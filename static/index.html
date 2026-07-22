@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PrepAI — AI Interview Preparation Assistant</title>
+  <meta name="description" content="Ace your next job interview with PrepAI — AI-powered mock interviews, resume analysis, real-time feedback, and personalized study roadmaps."/>
+  <link rel="stylesheet" href="/css/style.css"/>
+  <style>
+    .feature-icon { font-size: 28px; margin-bottom: 12px; display: block; }
+    .feature-title { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+    .feature-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
+
+    .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-top: 60px; }
+    .step-num { font-size: 48px; font-weight: 800; opacity: 0.1; margin-bottom: 8px; }
+    .step-title { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+    .step-desc { font-size: 13px; color: var(--text-secondary); }
+
+    .glow-border {
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      box-shadow: 0 0 40px rgba(139, 92, 246, 0.08);
+    }
+    @media (max-width: 900px) {
+      .steps { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <a class="navbar-brand" href="/">
+      <div class="navbar-logo">🎯</div>
+      <span>PrepAI</span>
+    </a>
+    <ul class="navbar-nav">
+      <li><a href="/">Home</a></li>
+      <li><a href="/dashboard.html">Dashboard</a></li>
+      <li><a href="/upload.html">Upload Resume</a></li>
+      <li><a href="/interview.html">Mock Interview</a></li>
+    </ul>
+    <a href="/upload.html" class="btn btn-primary btn-sm">Get Started →</a>
+  </nav>
+
+  <div class="page-wrapper">
+    <!-- HERO -->
+    <section class="hero">
+      <div style="position:relative;z-index:1;max-width:900px;margin:0 auto;">
+        <div class="hero-badge">✨ Powered by Groq LLaMA 3.3 70B</div>
+        <h1 class="hero-title">
+          Land Your Dream Job<br/>with <span class="gradient-text">AI-Powered</span> Prep
+        </h1>
+        <p class="hero-subtitle">
+          Upload your resume, practice mock interviews with real-time AI feedback,
+          get personalized evaluation scores, and follow a tailored study roadmap.
+        </p>
+        <div class="hero-actions">
+          <a href="/upload.html" class="btn btn-primary btn-lg">Upload Resume 📄</a>
+          <a href="/dashboard.html" class="btn btn-secondary btn-lg">View Dashboard</a>
+        </div>
+
+        <!-- Feature Cards -->
+        <div class="hero-features" style="margin-top:64px;">
+          <div class="card glow-border">
+            <span class="feature-icon">📋</span>
+            <div class="feature-title">Resume Analysis</div>
+            <div class="feature-desc">AI extracts your skills, experience, strengths and suggests improvements instantly.</div>
+          </div>
+          <div class="card glow-border">
+            <span class="feature-icon">🎤</span>
+            <div class="feature-title">Mock Interviews</div>
+            <div class="feature-desc">Practice HR, Technical, and Coding interviews with a streaming AI interviewer.</div>
+          </div>
+          <div class="card glow-border">
+            <span class="feature-icon">🗺️</span>
+            <div class="feature-title">Study Roadmap</div>
+            <div class="feature-desc">Get a personalized 4-week roadmap based on your gaps and interview performance.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section class="section" style="background: rgba(255,255,255,0.02); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+      <div class="container">
+        <div style="text-align:center;margin-bottom:48px;">
+          <div class="section-title">How it works</div>
+          <h2 style="font-size:32px;font-weight:800;">Four Steps to Interview Confidence</h2>
+        </div>
+        <div class="steps">
+          <div class="card">
+            <div class="step-num gradient-text">01</div>
+            <div class="step-title">Upload Resume</div>
+            <div class="step-desc">Drop your PDF resume and let AI parse your experience, skills, and qualifications.</div>
+          </div>
+          <div class="card">
+            <div class="step-num gradient-text">02</div>
+            <div class="step-title">Review Analysis</div>
+            <div class="step-desc">Get a detailed breakdown of your profile with actionable improvement suggestions.</div>
+          </div>
+          <div class="card">
+            <div class="step-num gradient-text">03</div>
+            <div class="step-title">Practice Interview</div>
+            <div class="step-desc">Choose HR, Technical, or Coding and go through a live AI mock interview session.</div>
+          </div>
+          <div class="card">
+            <div class="step-num gradient-text">04</div>
+            <div class="step-title">Follow Roadmap</div>
+            <div class="step-desc">Get your personalized 4-week study plan to fill gaps and maximize your score.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- INTERVIEW TYPES -->
+    <section class="section">
+      <div class="container">
+        <div style="text-align:center;margin-bottom:48px;">
+          <div class="section-title">Interview Types</div>
+          <h2 style="font-size:32px;font-weight:800;">Three Modes to <span class="gradient-text">Master</span></h2>
+        </div>
+        <div class="grid-3">
+          <div class="card" style="text-align:center;">
+            <span style="font-size:48px;display:block;margin-bottom:16px;">🤝</span>
+            <h3 style="font-size:18px;font-weight:700;margin-bottom:8px;">HR Interview</h3>
+            <p style="color:var(--text-secondary);font-size:14px;margin-bottom:20px;">Behavioral questions, STAR method, culture fit, and career motivations assessed by a friendly AI recruiter.</p>
+            <a href="/interview.html?type=hr" class="btn btn-outline">Start HR Mock →</a>
+          </div>
+          <div class="card" style="text-align:center;border-color:rgba(139,92,246,0.3);">
+            <span style="font-size:48px;display:block;margin-bottom:16px;">💻</span>
+            <h3 style="font-size:18px;font-weight:700;margin-bottom:8px;">Technical Interview</h3>
+            <p style="color:var(--text-secondary);font-size:14px;margin-bottom:20px;">System design, data structures, APIs, databases, and your specific tech stack — calibrated to your resume.</p>
+            <a href="/interview.html?type=technical" class="btn btn-primary">Start Technical Mock →</a>
+          </div>
+          <div class="card" style="text-align:center;">
+            <span style="font-size:48px;display:block;margin-bottom:16px;">🧩</span>
+            <h3 style="font-size:18px;font-weight:700;margin-bottom:8px;">Coding Interview</h3>
+            <p style="color:var(--text-secondary);font-size:14px;margin-bottom:20px;">DSA problems, algorithm walkthroughs, time/space complexity and edge case analysis.</p>
+            <a href="/interview.html?type=coding" class="btn btn-outline">Start Coding Mock →</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer style="border-top:1px solid var(--border);padding:40px 0;text-align:center;color:var(--text-muted);font-size:13px;">
+      <div class="container">
+        <p>Built with ❤️ using Flask + Groq LLaMA 3.3 · <span class="gradient-text">PrepAI</span></p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/js/main.js"></script>
+</body>
+</html>

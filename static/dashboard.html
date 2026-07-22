@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard — PrepAI</title>
+  <meta name="description" content="Your PrepAI dashboard — overview of resumes, sessions, and scores."/>
+  <link rel="stylesheet" href="/css/style.css"/>
+</head>
+<body>
+  <nav class="navbar">
+    <a class="navbar-brand" href="/"><div class="navbar-logo">🎯</div><span>PrepAI</span></a>
+    <ul class="navbar-nav">
+      <li><a href="/">Home</a></li>
+      <li><a href="/dashboard.html" class="active">Dashboard</a></li>
+      <li><a href="/upload.html">Upload Resume</a></li>
+      <li><a href="/interview.html">Mock Interview</a></li>
+      <li><a href="/roadmap.html">Roadmap</a></li>
+    </ul>
+    <a href="/upload.html" class="btn btn-primary btn-sm">+ New Resume</a>
+  </nav>
+
+  <div class="page-wrapper">
+    <div class="container section">
+      <div class="page-header">
+        <h1>Dashboard</h1>
+        <p>Your interview prep overview at a glance</p>
+      </div>
+
+      <!-- STAT CARDS -->
+      <div class="grid-4" id="statsRow" style="margin-bottom:40px;">
+        <div class="stat-card">
+          <div class="stat-icon" style="background:rgba(139,92,246,0.15);">📄</div>
+          <div class="stat-value gradient-text" id="statResumes">—</div>
+          <div class="stat-label">Resumes Uploaded</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:rgba(59,130,246,0.15);">🎤</div>
+          <div class="stat-value" style="color:var(--blue);" id="statSessions">—</div>
+          <div class="stat-label">Interview Sessions</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:rgba(16,185,129,0.15);">⭐</div>
+          <div class="stat-value" style="color:var(--green);" id="statAvgScore">—</div>
+          <div class="stat-label">Avg. Score</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:rgba(245,158,11,0.15);">🏆</div>
+          <div class="stat-value" style="color:var(--orange);" id="statBestScore">—</div>
+          <div class="stat-label">Best Score</div>
+        </div>
+      </div>
+
+      <!-- QUICK ACTIONS -->
+      <div class="section-title">Quick Actions</div>
+      <div class="grid-3" style="margin-bottom:40px;">
+        <a href="/upload.html" class="card" style="text-decoration:none;display:block;text-align:center;padding:32px;">
+          <span style="font-size:40px;display:block;margin-bottom:12px;">📄</span>
+          <div style="font-weight:700;margin-bottom:4px;">Upload Resume</div>
+          <div style="font-size:13px;color:var(--text-secondary);">Start by uploading your PDF</div>
+        </a>
+        <a href="/interview.html" class="card" style="text-decoration:none;display:block;text-align:center;padding:32px;border-color:rgba(139,92,246,0.3);">
+          <span style="font-size:40px;display:block;margin-bottom:12px;">🎤</span>
+          <div style="font-weight:700;margin-bottom:4px;">Start Interview</div>
+          <div style="font-size:13px;color:var(--text-secondary);">Practice with AI interviewer</div>
+        </a>
+        <a href="/roadmap.html" class="card" style="text-decoration:none;display:block;text-align:center;padding:32px;">
+          <span style="font-size:40px;display:block;margin-bottom:12px;">🗺️</span>
+          <div style="font-weight:700;margin-bottom:4px;">Study Roadmap</div>
+          <div style="font-size:13px;color:var(--text-secondary);">Get your personalized plan</div>
+        </a>
+      </div>
+
+      <!-- RECENT SESSIONS -->
+      <div class="section-title">Recent Interview Sessions</div>
+      <div id="sessionsContainer">
+        <div class="empty-state">
+          <span class="empty-state-icon">🎤</span>
+          <h3>No sessions yet</h3>
+          <p>Start your first mock interview to see results here.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/main.js"></script>
+  <script>
+    const typeColors = { hr: 'badge-blue', technical: 'badge-purple', coding: 'badge-orange' };
+    const typeIcons = { hr: '🤝', technical: '💻', coding: '🧩' };
+
+    async function loadDashboard() {
+      const data = await API.getSessions();
+      const sessions = data.sessions || [];
+
+      document.getElementById('statSessions').textContent = sessions.length;
+
+      if (!sessions.length) return;
+
+      // For stats, we fetch feedback for first 3 sessions max
+      let scores = [];
+      await Promise.all(sessions.slice(0, 5).map(async s => {
+        const fb = await API.getFeedback(s.id);
+        if (fb.average_score) scores.push(fb.average_score);
+      }));
+
+      if (scores.length) {
+        document.getElementById('statAvgScore').textContent = (scores.reduce((a,b)=>a+b,0)/scores.length).toFixed(1);
+        document.getElementById('statBestScore').textContent = Math.max(...scores).toFixed(1);
+      }
+
+      // Count resumes (unique)
+      const resumeIds = new Set(sessions.map(s => s.resume_id).filter(Boolean));
+      document.getElementById('statResumes').textContent = resumeIds.size;
+
+      // Render sessions
+      const container = document.getElementById('sessionsContainer');
+      container.innerHTML = sessions.map(s => `
+        <div class="card" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding:20px 24px;">
+          <div style="display:flex;align-items:center;gap:16px;">
+            <span style="font-size:28px;">${typeIcons[s.interview_type] || '🎤'}</span>
+            <div>
+              <div style="font-weight:600;margin-bottom:2px;">${s.interview_type.charAt(0).toUpperCase()+s.interview_type.slice(1)} Interview</div>
+              <div style="font-size:12px;color:var(--text-muted);">${s.filename || 'No resume'} · ${new Date(s.created_at).toLocaleDateString()}</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;">
+            <span class="badge ${typeColors[s.interview_type] || 'badge-purple'}">${s.q_count || 0} questions</span>
+            <a href="/feedback.html?session_id=${s.id}" class="btn btn-secondary btn-sm">View Feedback</a>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    loadDashboard();
+  </script>
+</body>
+</html>

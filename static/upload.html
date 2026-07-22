@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Upload Resume — PrepAI</title>
+  <meta name="description" content="Upload your PDF resume for AI-powered analysis and interview preparation."/>
+  <link rel="stylesheet" href="/css/style.css"/>
+  <style>
+    .upload-success-icon { font-size: 64px; display: block; margin-bottom: 16px; }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <a class="navbar-brand" href="/"><div class="navbar-logo">🎯</div><span>PrepAI</span></a>
+    <ul class="navbar-nav">
+      <li><a href="/">Home</a></li>
+      <li><a href="/dashboard.html">Dashboard</a></li>
+      <li><a href="/upload.html" class="active">Upload Resume</a></li>
+      <li><a href="/interview.html">Mock Interview</a></li>
+      <li><a href="/roadmap.html">Roadmap</a></li>
+    </ul>
+    <a href="/dashboard.html" class="btn btn-secondary btn-sm">Dashboard</a>
+  </nav>
+
+  <div class="page-wrapper">
+    <div class="container section" style="max-width:700px;">
+      <div class="page-header">
+        <h1>Upload Your Resume</h1>
+        <p>We'll analyze your resume with AI and use it to personalize your mock interviews.</p>
+      </div>
+
+      <!-- UPLOAD FORM -->
+      <div id="uploadSection">
+        <div class="upload-area" id="uploadArea">
+          <input type="file" id="fileInput" accept=".pdf" aria-label="Select PDF resume"/>
+          <span class="upload-icon">📄</span>
+          <div class="upload-title">Drop your PDF here</div>
+          <div class="upload-hint" style="margin-bottom:16px;">or click to browse files</div>
+          <div id="fileName" style="color:var(--purple-light);font-size:14px;font-weight:600;"></div>
+        </div>
+
+        <div style="margin-top:24px;text-align:center;">
+          <button id="uploadBtn" class="btn btn-primary btn-lg" disabled>
+            <span>Upload & Analyze Resume</span>
+          </button>
+        </div>
+
+        <div class="card" style="margin-top:32px;">
+          <div class="section-title" style="margin-bottom:12px;">What we analyze</div>
+          <ul class="analysis-list">
+            <li>Technical skills and tech stack</li>
+            <li>Years of experience and education level</li>
+            <li>Professional strengths and areas to improve</li>
+            <li>Suitable job titles and roles</li>
+            <li>Personalized interview question topics</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- SUCCESS STATE -->
+      <div id="successSection" style="display:none;text-align:center;">
+        <div class="card" style="padding:48px;">
+          <span class="upload-success-icon">✅</span>
+          <h2 style="font-size:24px;font-weight:800;margin-bottom:8px;">Resume Uploaded!</h2>
+          <p style="color:var(--text-secondary);margin-bottom:32px;" id="successFilename"></p>
+          <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;">
+            <a id="analysisLink" href="/analysis.html" class="btn btn-primary btn-lg">View Analysis 🔍</a>
+            <a id="interviewLink" href="/interview.html" class="btn btn-secondary btn-lg">Start Interview 🎤</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/main.js"></script>
+  <script>
+    const fileInput = document.getElementById('fileInput');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const uploadArea = document.getElementById('uploadArea');
+    const fileNameEl = document.getElementById('fileName');
+    let selectedFile = null;
+
+    fileInput.addEventListener('change', () => {
+      selectedFile = fileInput.files[0];
+      if (selectedFile) {
+        fileNameEl.textContent = `📎 ${selectedFile.name}`;
+        uploadBtn.disabled = false;
+      }
+    });
+
+    // Drag and drop
+    uploadArea.addEventListener('dragover', e => { e.preventDefault(); uploadArea.classList.add('dragover'); });
+    uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dragover'));
+    uploadArea.addEventListener('drop', e => {
+      e.preventDefault();
+      uploadArea.classList.remove('dragover');
+      const file = e.dataTransfer.files[0];
+      if (file && file.type === 'application/pdf') {
+        selectedFile = file;
+        fileNameEl.textContent = `📎 ${file.name}`;
+        uploadBtn.disabled = false;
+      } else {
+        showToast('Please drop a PDF file', 'error');
+      }
+    });
+
+    uploadBtn.addEventListener('click', async () => {
+      if (!selectedFile) return;
+      showLoading('Uploading and parsing your resume...');
+      uploadBtn.disabled = true;
+
+      const result = await API.upload(selectedFile);
+      hideLoading();
+
+      if (result.error) {
+        showToast(result.error, 'error');
+        uploadBtn.disabled = false;
+        return;
+      }
+
+      // Save resume_id
+      Store.set('resume_id', result.resume_id);
+      Store.set('resume_filename', result.filename);
+
+      showToast('Resume uploaded successfully!', 'success');
+
+      // Show success
+      document.getElementById('uploadSection').style.display = 'none';
+      const success = document.getElementById('successSection');
+      success.style.display = 'block';
+      document.getElementById('successFilename').textContent = result.filename;
+      document.getElementById('analysisLink').href = `/analysis.html?resume_id=${result.resume_id}`;
+      document.getElementById('interviewLink').href = `/interview.html?resume_id=${result.resume_id}`;
+    });
+  </script>
+</body>
+</html>

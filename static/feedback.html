@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Interview Feedback — PrepAI</title>
+  <meta name="description" content="Detailed feedback and scoring from your PrepAI mock interview session."/>
+  <link rel="stylesheet" href="/css/style.css"/>
+</head>
+<body>
+  <nav class="navbar">
+    <a class="navbar-brand" href="/"><div class="navbar-logo">🎯</div><span>PrepAI</span></a>
+    <ul class="navbar-nav">
+      <li><a href="/">Home</a></li>
+      <li><a href="/dashboard.html">Dashboard</a></li>
+      <li><a href="/upload.html">Upload Resume</a></li>
+      <li><a href="/interview.html">Mock Interview</a></li>
+      <li><a href="/roadmap.html">Roadmap</a></li>
+    </ul>
+    <a href="/roadmap.html" class="btn btn-primary btn-sm">Get Roadmap →</a>
+  </nav>
+
+  <div class="page-wrapper">
+    <div class="container section">
+      <div class="page-header">
+        <h1>Interview Feedback</h1>
+        <p>Detailed performance breakdown from your mock interview session</p>
+      </div>
+
+      <div id="loadingState" style="text-align:center;padding:80px 0;">
+        <div class="spinner" style="margin:0 auto 20px;width:48px;height:48px;border-width:4px;"></div>
+        <p style="color:var(--text-secondary);">Loading your feedback...</p>
+      </div>
+
+      <div id="feedbackContent" style="display:none;">
+        <!-- OVERVIEW CARDS -->
+        <div class="grid-4" style="margin-bottom:32px;">
+          <div class="stat-card">
+            <div class="stat-icon" style="background:rgba(139,92,246,0.15);">🎯</div>
+            <div class="stat-value gradient-text" id="avgScoreDisplay">—</div>
+            <div class="stat-label">Average Score</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:rgba(59,130,246,0.15);">❓</div>
+            <div class="stat-value" style="color:var(--blue);" id="totalQDisplay">—</div>
+            <div class="stat-label">Total Questions</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:rgba(16,185,129,0.15);">✅</div>
+            <div class="stat-value" style="color:var(--green);" id="answeredDisplay">—</div>
+            <div class="stat-label">Answered</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:rgba(245,158,11,0.15);">🏆</div>
+            <div class="stat-value" style="color:var(--orange);" id="gradeDisplay">—</div>
+            <div class="stat-label">Grade</div>
+          </div>
+        </div>
+
+        <!-- OVERALL SCORE RING -->
+        <div class="card" style="display:flex;align-items:center;gap:32px;margin-bottom:32px;flex-wrap:wrap;">
+          <div id="overallRing" style="flex-shrink:0;"></div>
+          <div style="flex:1;">
+            <h3 style="font-size:20px;font-weight:700;margin-bottom:8px;">Overall Performance</h3>
+            <div id="overallProgress" class="progress-bar" style="height:10px;margin-bottom:16px;"></div>
+            <p id="overallSummary" style="color:var(--text-secondary);font-size:14px;line-height:1.6;"></p>
+          </div>
+          <div style="flex-shrink:0;display:flex;gap:12px;flex-wrap:wrap;">
+            <a href="/interview.html" class="btn btn-secondary">🔄 Retake Interview</a>
+            <a href="/roadmap.html" id="roadmapBtn" class="btn btn-primary">🗺️ Study Roadmap</a>
+          </div>
+        </div>
+
+        <!-- QUESTION-BY-QUESTION -->
+        <div class="section-title" style="margin-bottom:16px;">Question-by-Question Breakdown</div>
+        <div id="questionBreakdown"></div>
+      </div>
+
+      <div id="errorState" style="display:none;" class="empty-state">
+        <span class="empty-state-icon">📭</span>
+        <h3>No Feedback Available</h3>
+        <p>Complete a mock interview session to see detailed feedback here.</p>
+        <a href="/interview.html" class="btn btn-primary" style="margin-top:20px;">Start Interview →</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/main.js"></script>
+  <script>
+    async function loadFeedback() {
+      const params = new URLSearchParams(window.location.search);
+      const sessionId = params.get('session_id') || Store.get('session_id');
+
+      if (!sessionId) {
+        document.getElementById('loadingState').style.display = 'none';
+        document.getElementById('errorState').style.display = 'block';
+        return;
+      }
+
+      const data = await API.getFeedback(sessionId);
+      document.getElementById('loadingState').style.display = 'none';
+
+      if (data.error || !data.details) {
+        document.getElementById('errorState').style.display = 'block';
+        return;
+      }
+
+      const avg = data.average_score || 0;
+      const content = document.getElementById('feedbackContent');
+      content.style.display = 'block';
+
+      document.getElementById('avgScoreDisplay').textContent = avg;
+      document.getElementById('totalQDisplay').textContent = data.total_questions;
+      document.getElementById('answeredDisplay').textContent = data.answered;
+      document.getElementById('gradeDisplay').textContent = scoreGrade(avg);
+
+      // Overall ring
+      document.getElementById('overallRing').innerHTML = renderScoreRing(avg);
+      document.getElementById('overallProgress').innerHTML = `<div class="progress-fill" style="width:${avg*10}%;background:linear-gradient(90deg,${scoreColor(avg)},${scoreColor(avg)}aa)"></div>`;
+      document.getElementById('overallSummary').textContent =
+        avg >= 8 ? 'Excellent performance! You demonstrated strong command across all questions.' :
+        avg >= 6 ? 'Good performance. With some focused practice you\'ll be interview-ready.' :
+        'There\'s room for improvement. Use the study roadmap to address your gaps.';
+
+      // Roadmap link
+      document.getElementById('roadmapBtn').href = `/roadmap.html?session_id=${sessionId}`;
+
+      // Question breakdown
+      const breakdown = document.getElementById('questionBreakdown');
+      breakdown.innerHTML = (data.details || []).map((item, i) => {
+        const score = item.score || 0;
+        const fb = item.feedback || {};
+        const color = scoreColor(score);
+        return `
+        <div class="card" style="margin-bottom:16px;">
+          <div style="display:flex;align-items:flex-start;gap:16px;margin-bottom:16px;">
+            <div class="q-count-badge" style="background:linear-gradient(135deg,${color},${color}aa);">${i+1}</div>
+            <div style="flex:1;">
+              <div style="font-weight:600;margin-bottom:6px;line-height:1.5;">${item.question}</div>
+              <div style="font-size:13px;color:var(--text-secondary);line-height:1.6;">${item.answer}</div>
+            </div>
+            <div style="font-size:24px;font-weight:800;color:${color};flex-shrink:0;">${score}/10</div>
+          </div>
+          ${fb.summary ? `<div style="font-size:13px;padding:12px 16px;background:rgba(255,255,255,0.03);border-radius:8px;border-left:3px solid ${color};color:var(--text-secondary);">${fb.summary}</div>` : ''}
+          ${fb.strengths && fb.strengths.length ? `
+            <div style="margin-top:12px;">
+              <div style="font-size:12px;font-weight:700;color:#34d399;margin-bottom:6px;">STRENGTHS</div>
+              <div style="font-size:13px;color:var(--text-secondary);">${fb.strengths.join(' · ')}</div>
+            </div>` : ''}
+          ${fb.improvements && fb.improvements.length ? `
+            <div style="margin-top:10px;">
+              <div style="font-size:12px;font-weight:700;color:#fbbf24;margin-bottom:6px;">TO IMPROVE</div>
+              <div style="font-size:13px;color:var(--text-secondary);">${fb.improvements.join(' · ')}</div>
+            </div>` : ''}
+        </div>`;
+      }).join('');
+    }
+
+    // Helper reuse from main.js
+    function scoreGrade(s) {
+      if (s >= 9) return 'A+';
+      if (s >= 8) return 'A';
+      if (s >= 7) return 'B+';
+      if (s >= 6) return 'B';
+      if (s >= 5) return 'C';
+      return 'D';
+    }
+
+    loadFeedback();
+  </script>
+</body>
+</html>
