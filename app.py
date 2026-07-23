@@ -12,7 +12,6 @@ app = Flask(__name__, static_folder="static", static_url_path="")
 app.secret_key = FLASK_SECRET_KEY
 CORS(app)
 
-# Register blueprints
 app.register_blueprint(resume_bp)
 app.register_blueprint(interview_bp)
 app.register_blueprint(feedback_bp)

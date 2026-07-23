@@ -17,7 +17,6 @@ def allowed_file(filename):
 
 
 def parse_analysis_json(raw: str) -> dict:
-    """Parse JSON from LLM response, stripping code fences if needed."""
     try:
         return json.loads(raw)
     except json.JSONDecodeError:
@@ -63,7 +62,6 @@ def resume_summary():
     if not resume:
         return jsonify({"error": "No resume found"}), 404
 
-    # --- CACHE CHECK: return instantly if already analyzed ---
     if not force_refresh:
         cached = get_analysis_cache(resume["id"])
         if cached:
@@ -74,12 +72,10 @@ def resume_summary():
                 "cached": True
             })
 
-    # --- LLM call (only on first visit or forced refresh) ---
     system_prompt = load_prompt("resume_analyzer")
     raw = chat_complete(system_prompt, f"Analyze this resume:\n\n{resume['parsed_text'][:4000]}")
     analysis = parse_analysis_json(raw)
 
-    # Save to cache for future calls
     save_analysis_cache(resume["id"], json.dumps(analysis))
 
     return jsonify({
@@ -92,7 +88,6 @@ def resume_summary():
 
 @resume_bp.route("/api/resume-summary/stream", methods=["GET"])
 def resume_summary_stream():
-    """SSE streaming version of resume analysis — results appear word-by-word."""
     resume_id = request.args.get("resume_id")
     force_refresh = request.args.get("refresh", "false").lower() == "true"
 
@@ -104,7 +99,6 @@ def resume_summary_stream():
     if not resume:
         return jsonify({"error": "No resume found"}), 404
 
-    # Return cached result instantly via SSE
     if not force_refresh:
         cached = get_analysis_cache(resume["id"])
         if cached:

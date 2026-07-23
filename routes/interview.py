@@ -87,10 +87,6 @@ def start_interview():
 
 @interview_bp.route("/api/mock-interview/answer", methods=["POST"])
 def answer_question():
-    """
-    Accepts the candidate's answer, evaluates it, then streams the next question.
-    If total questions (5) is reached, streams a concluding wrap-up and sends [FINISHED].
-    """
     data = request.get_json()
     session_id = data.get("session_id")
     question_id = data.get("question_id")
@@ -104,7 +100,6 @@ def answer_question():
     if not session:
         return jsonify({"error": "Session not found"}), 404
 
-    # Evaluate the answer first
     eval_prompt = load_prompt("evaluator")
     history = get_session_history(int(session_id))
     question_text = next(
@@ -126,7 +121,6 @@ def answer_question():
     feedback_text = json.dumps(evaluation)
     insert_answer(int(question_id), answer_text, feedback_text, score)
 
-    # Prepare next step
     resume = get_resume(session["resume_id"]) if session.get("resume_id") else None
     resume_text = build_resume_context(resume)
     prompt_name = INTERVIEW_PROMPT_MAP.get(session["interview_type"], "hr_interviewer")
@@ -165,7 +159,6 @@ def answer_question():
 
     def generate():
         collected = []
-        # First send the evaluation event
         yield f"data: [EVAL]{json.dumps(evaluation)}\n\n"
 
         for chunk in chat_stream(system_prompt, messages):
@@ -174,7 +167,6 @@ def answer_question():
 
         full_text = "".join(collected)
         if not is_last_question:
-            # Save next question to DB
             new_q_id = insert_question(int(session_id), full_text, new_q_index)
             yield f"data: [DONE]{json.dumps({'question_id': new_q_id, 'q_index': new_q_index, 'total_questions': TOTAL_QUESTIONS})}\n\n"
         else:

@@ -33,15 +33,12 @@
         </button>
       </div>
 
-      <!-- LOADING -->
       <div id="loadingState" style="text-align:center;padding:80px 0;">
         <div class="spinner" style="margin:0 auto 20px;width:48px;height:48px;border-width:4px;"></div>
         <p style="color:var(--text-secondary);">Analyzing your resume with AI...</p>
       </div>
 
-      <!-- ANALYSIS CONTENT -->
       <div id="analysisContent" style="display:none;">
-        <!-- Profile Header -->
         <div class="card card-glow" style="margin-bottom:28px;display:flex;align-items:center;gap:24px;flex-wrap:wrap;">
           <div style="width:72px;height:72px;background:var(--gradient-primary);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;flex-shrink:0;">
             <i data-lucide="user" style="width:36px;height:36px;"></i>
@@ -57,14 +54,12 @@
         </div>
 
         <div class="grid-2" style="margin-bottom:28px;">
-          <!-- Skills -->
           <div class="card">
             <div class="section-title" style="margin-bottom:16px;display:flex;align-items:center;gap:8px;color:var(--purple-light);">
               <i data-lucide="cpu" style="width:18px;height:18px;"></i> Technical Skills
             </div>
             <div class="skill-tags" id="skillTags"></div>
           </div>
-          <!-- Education -->
           <div class="card">
             <div class="section-title" style="margin-bottom:16px;display:flex;align-items:center;gap:8px;color:var(--blue);">
               <i data-lucide="graduation-cap" style="width:18px;height:18px;"></i> Education
@@ -78,14 +73,12 @@
         </div>
 
         <div class="grid-2" style="margin-bottom:32px;">
-          <!-- Strengths -->
           <div class="card" style="border-color:rgba(16,185,129,0.2);">
             <div class="section-title" style="margin-bottom:12px;color:#34d399;display:flex;align-items:center;gap:8px;">
               <i data-lucide="check-circle-2" style="width:18px;height:18px;"></i> Key Strengths
             </div>
             <ul class="analysis-list" id="strengthsList"></ul>
           </div>
-          <!-- Improvements -->
           <div class="card" style="border-color:rgba(245,158,11,0.2);">
             <div class="section-title" style="margin-bottom:12px;color:#fbbf24;display:flex;align-items:center;gap:8px;">
               <i data-lucide="zap" style="width:18px;height:18px;"></i> Areas to Improve
@@ -94,7 +87,6 @@
           </div>
         </div>
 
-        <!-- CTA -->
         <div class="card" style="text-align:center;padding:40px;background:linear-gradient(135deg,rgba(139,92,246,0.08),rgba(59,130,246,0.08));border-color:rgba(139,92,246,0.2);">
           <h3 style="font-size:20px;font-weight:700;margin-bottom:8px;">Ready to Practice?</h3>
           <p style="color:var(--text-secondary);margin-bottom:24px;">Start a 5-question mock interview tailored directly to your resume projects & experience.</p>
@@ -106,7 +98,6 @@
         </div>
       </div>
 
-      <!-- ERROR STATE -->
       <div id="errorState" style="display:none;" class="empty-state">
         <span class="empty-state-icon" style="color:var(--orange);"><i data-lucide="alert-triangle" style="width:48px;height:48px;"></i></span>
         <h3>No Resume Found</h3>

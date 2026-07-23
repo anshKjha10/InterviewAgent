@@ -20,7 +20,6 @@ def init_db():
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
 
-        -- Add column if upgrading existing DB
         CREATE TABLE IF NOT EXISTS resumes_v2_migration (done INTEGER);
 
         CREATE TABLE IF NOT EXISTS sessions (
@@ -50,14 +49,13 @@ def init_db():
     """)
     conn.commit()
     conn.close()
-    # Migrate existing DB — add analysis_json column if it doesn't exist yet
     try:
         conn2 = get_conn()
         conn2.execute("ALTER TABLE resumes ADD COLUMN analysis_json TEXT")
         conn2.commit()
         conn2.close()
     except Exception:
-        pass  # Column already exists
+        pass
 
 
 def save_analysis_cache(resume_id: int, analysis_json: str):

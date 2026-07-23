@@ -5,7 +5,6 @@ from config import GROQ_MODEL, GROQ_API_KEY
 
 
 def get_api_key() -> str:
-    """Read API key dynamically from env in case .env was updated."""
     from dotenv import load_dotenv
     load_dotenv(override=True)
     key = os.getenv("GROQ_API_KEY", "").strip().strip('"').strip("'")
@@ -20,7 +19,6 @@ def get_client() -> Groq:
 
 
 def chat_complete(system_prompt: str, user_message: str) -> str:
-    """Non-streaming completion — returns full text response."""
     try:
         client = get_client()
         response = client.chat.completions.create(
@@ -40,10 +38,6 @@ def chat_complete(system_prompt: str, user_message: str) -> str:
 
 
 def chat_stream(system_prompt: str, messages: list):
-    """
-    Streaming generator — yields text chunks.
-    `messages` is a list of {"role": ..., "content": ...} dicts.
-    """
     try:
         client = get_client()
         stream = client.chat.completions.create(
@@ -64,6 +58,5 @@ def chat_stream(system_prompt: str, messages: list):
 
 
 def load_prompt(name: str) -> str:
-    """Load a prompt template from the prompts/ directory."""
     with open(f"prompts/{name}.txt", "r", encoding="utf-8") as f:
         return f.read()

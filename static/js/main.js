@@ -1,4 +1,3 @@
-// ===================== UTILITIES =====================
 const API = {
   async handleResponse(res) {
     try {
@@ -49,7 +48,6 @@ const API = {
   }
 };
 
-// ===================== STORAGE =====================
 const Store = {
   set(key, val) { localStorage.setItem(`aip_${key}`, JSON.stringify(val)); },
   get(key) {
@@ -59,14 +57,12 @@ const Store = {
   clear(key) { localStorage.removeItem(`aip_${key}`); }
 };
 
-// ===================== LUCIDE ICON REFRESH =====================
 function refreshIcons() {
   if (typeof lucide !== 'undefined' && lucide.createIcons) {
     lucide.createIcons();
   }
 }
 
-// ===================== TOAST =====================
 function showToast(msg, type = 'info') {
   let container = document.getElementById('toastContainer');
   if (!container) {
@@ -89,7 +85,6 @@ function showToast(msg, type = 'info') {
   }, 3500);
 }
 
-// ===================== LOADING =====================
 function showLoading(text = 'Processing...') {
   let overlay = document.getElementById('loadingOverlay');
   if (!overlay) {
@@ -108,7 +103,6 @@ function hideLoading() {
   if (overlay) overlay.classList.remove('active');
 }
 
-// ===================== NAVBAR ACTIVE STATE =====================
 function setNavActive() {
   const path = window.location.pathname.replace('/', '') || 'index.html';
   document.querySelectorAll('.navbar-nav a').forEach(a => {
@@ -122,7 +116,6 @@ function setNavActive() {
 
 document.addEventListener('DOMContentLoaded', setNavActive);
 
-// ===================== SCORE COLOR =====================
 function scoreColor(score) {
   if (score >= 8) return '#10b981';
   if (score >= 6) return '#f59e0b';
@@ -136,7 +129,6 @@ function scoreGrade(score) {
   return 'Needs Work';
 }
 
-// ===================== RENDER SCORE RING =====================
 function renderScoreRing(score, maxScore = 10) {
   const pct = (score / maxScore) * 100;
   const r = 40, cx = 50, cy = 50;
@@ -157,7 +149,6 @@ function renderScoreRing(score, maxScore = 10) {
     </div>`;
 }
 
-// ===================== SSE ANSWER STREAM =====================
 function streamAnswer({ sessionId, questionId, answer, qIndex, onEval, onChunk, onDone, onFinished }) {
   fetch('/api/mock-interview/answer', {
     method: 'POST',

@@ -1,6 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 
-/* ===================== CSS VARIABLES ===================== */
 :root {
   --bg-primary: #0a0a0f;
   --bg-secondary: #0f0f1a;
@@ -40,7 +39,6 @@
   --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* ===================== RESET & BASE ===================== */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 html { scroll-behavior: smooth; }
@@ -66,13 +64,11 @@ body::before {
   z-index: 0;
 }
 
-/* ===================== SCROLLBAR ===================== */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: var(--bg-secondary); }
 ::-webkit-scrollbar-thumb { background: var(--purple-dark); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--purple); }
 
-/* ===================== NAVBAR ===================== */
 .navbar {
   position: fixed;
   top: 0; left: 0; right: 0;
@@ -134,7 +130,6 @@ body::before {
   background: var(--bg-card);
 }
 
-/* ===================== LAYOUT ===================== */
 .page-wrapper {
   padding-top: 80px;
   position: relative;
@@ -151,7 +146,6 @@ body::before {
   padding: 60px 0;
 }
 
-/* ===================== CARDS ===================== */
 .card {
   background: var(--bg-card);
   border: 1px solid var(--border);
@@ -172,7 +166,6 @@ body::before {
   box-shadow: var(--shadow-glow);
 }
 
-/* ===================== BUTTONS ===================== */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -242,7 +235,6 @@ body::before {
   transform: none;
 }
 
-/* ===================== BADGE ===================== */
 .badge {
   display: inline-flex;
   align-items: center;
@@ -259,7 +251,6 @@ body::before {
 .badge-orange { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
 .badge-red    { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
 
-/* ===================== FORMS ===================== */
 .form-group {
   margin-bottom: 20px;
 }
@@ -300,7 +291,6 @@ body::before {
   min-height: 100px;
 }
 
-/* ===================== HERO ===================== */
 .hero {
   min-height: 100vh;
   display: flex;
@@ -377,7 +367,6 @@ body::before {
   animation: fadeInUp 0.9s ease;
 }
 
-/* ===================== PAGE HEADER ===================== */
 .page-header {
   padding: 48px 0 32px;
   border-bottom: 1px solid var(--border);
@@ -395,12 +384,10 @@ body::before {
   font-size: 15px;
 }
 
-/* ===================== GRID LAYOUTS ===================== */
 .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
 .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
 .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
 
-/* ===================== STAT CARD ===================== */
 .stat-card {
   background: var(--bg-card);
   border: 1px solid var(--border);
@@ -437,7 +424,6 @@ body::before {
   font-weight: 500;
 }
 
-/* ===================== UPLOAD AREA ===================== */
 .upload-area {
   border: 2px dashed var(--border);
   border-radius: var(--radius-lg);
@@ -477,7 +463,6 @@ body::before {
   font-size: 14px;
 }
 
-/* ===================== INTERVIEW CHAT ===================== */
 .chat-container {
   display: flex;
   flex-direction: column;
@@ -580,7 +565,6 @@ body::before {
   box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
 }
 
-/* ===================== SCORE RING ===================== */
 .score-ring {
   position: relative;
   width: 100px; height: 100px;
@@ -607,7 +591,6 @@ body::before {
   font-weight: 500;
 }
 
-/* ===================== PROGRESS BAR ===================== */
 .progress-bar {
   height: 6px;
   background: rgba(255, 255, 255, 0.06);
@@ -623,7 +606,6 @@ body::before {
   transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* ===================== ROADMAP ===================== */
 .roadmap-week {
   position: relative;
   padding-left: 48px;
@@ -698,7 +680,6 @@ body::before {
   color: var(--purple-light);
 }
 
-/* ===================== EVAL CARD ===================== */
 .eval-card {
   background: rgba(16, 185, 129, 0.06);
   border: 1px solid rgba(16, 185, 129, 0.2);
@@ -715,7 +696,6 @@ body::before {
   margin-bottom: 12px;
 }
 
-/* ===================== TOAST ===================== */
 .toast-container {
   position: fixed;
   bottom: 24px;
@@ -743,7 +723,6 @@ body::before {
 .toast-error   { background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #f87171; }
 .toast-info    { background: rgba(139, 92, 246, 0.15); border: 1px solid rgba(139, 92, 246, 0.3); color: var(--purple-light); }
 
-/* ===================== LOADING SPINNER ===================== */
 .spinner {
   width: 24px; height: 24px;
   border: 2px solid rgba(139, 92, 246, 0.2);
@@ -772,7 +751,6 @@ body::before {
   font-size: 14px;
 }
 
-/* ===================== SKILL TAGS ===================== */
 .skill-tags {
   display: flex;
   flex-wrap: wrap;
@@ -795,7 +773,6 @@ body::before {
   color: var(--purple-light);
 }
 
-/* ===================== INTERVIEW TYPE SELECTOR ===================== */
 .type-selector {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -841,7 +818,6 @@ body::before {
   color: var(--text-secondary);
 }
 
-/* ===================== SECTION TITLE ===================== */
 .section-title {
   font-size: 13px;
   font-weight: 700;
@@ -851,14 +827,12 @@ body::before {
   margin-bottom: 16px;
 }
 
-/* ===================== DIVIDER ===================== */
 .divider {
   height: 1px;
   background: var(--border);
   margin: 32px 0;
 }
 
-/* ===================== EMPTY STATE ===================== */
 .empty-state {
   text-align: center;
   padding: 60px 24px;
@@ -869,7 +843,6 @@ body::before {
 .empty-state h3 { font-size: 18px; font-weight: 600; margin-bottom: 8px; color: var(--text-primary); }
 .empty-state p { font-size: 14px; }
 
-/* ===================== ANALYSIS LIST ===================== */
 .analysis-list { list-style: none; }
 .analysis-list li {
   padding: 10px 0;
@@ -884,7 +857,6 @@ body::before {
 .analysis-list li:last-child { border-bottom: none; }
 .analysis-list li::before { content: '→'; color: var(--purple); flex-shrink: 0; margin-top: 1px; }
 
-/* ===================== ANIMATIONS ===================== */
 @keyframes fadeInUp {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
@@ -915,7 +887,6 @@ body::before {
 .animate-fadeInUp { animation: fadeInUp 0.5s ease forwards; }
 .animate-pulse { animation: pulse 2s infinite; }
 
-/* ===================== RESPONSIVE ===================== */
 @media (max-width: 900px) {
   .navbar { padding: 16px 20px; }
   .navbar-nav { display: none; }
@@ -926,7 +897,6 @@ body::before {
   .hero { padding: 100px 16px 60px; }
 }
 
-/* ===================== GRADIENT TEXT UTILITY ===================== */
 .gradient-text {
   background: var(--gradient-primary);
   -webkit-background-clip: text;
