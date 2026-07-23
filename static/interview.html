@@ -6,6 +6,7 @@
   <title>Mock Interview — PrepAI</title>
   <meta name="description" content="Practice mock interviews with streaming AI feedback. HR, Technical, and Coding modes."/>
   <link rel="stylesheet" href="/css/style.css"/>
+  <script src="https://unpkg.com/lucide@latest"></script>
   <style>
     .interview-layout {
       display: grid;
@@ -24,14 +25,14 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 28px; height: 28px;
-      border-radius: 50%;
+      padding: 4px 12px;
+      border-radius: 12px;
       background: var(--gradient-primary);
       font-size: 12px;
       font-weight: 700;
       flex-shrink: 0;
     }
-    #setupPanel { padding: 40px 0; }
+    #setupPanel { padding: 40px 0 60px; }
     @media (max-width: 900px) {
       .interview-layout { grid-template-columns: 1fr; }
       .interview-sidebar { display: none; }
@@ -40,7 +41,7 @@
 </head>
 <body>
   <nav class="navbar">
-    <a class="navbar-brand" href="/"><div class="navbar-logo">🎯</div><span>PrepAI</span></a>
+    <a class="navbar-brand" href="/"><div class="navbar-logo"><i data-lucide="target" style="width:20px;height:20px;color:white;"></i></div><span>PrepAI</span></a>
     <ul class="navbar-nav">
       <li><a href="/">Home</a></li>
       <li><a href="/dashboard.html">Dashboard</a></li>
@@ -59,30 +60,30 @@
         <div style="max-width:600px;margin:0 auto;">
           <div class="page-header">
             <h1>Start Mock Interview</h1>
-            <p>Choose your interview type and begin your AI-powered session</p>
+            <p>Select an interview mode to begin your 5-question resume-anchored AI session</p>
           </div>
 
           <div class="section-title" style="margin-bottom:12px;">Select Interview Type</div>
           <div class="type-selector">
             <div class="type-card selected" data-type="hr" onclick="selectType('hr', this)">
-              <span class="type-icon">🤝</span>
+              <span class="type-icon" style="color:var(--purple-light);"><i data-lucide="users" style="width:32px;height:32px;"></i></span>
               <div class="type-title">HR Interview</div>
-              <div class="type-desc">Behavioral & culture fit</div>
+              <div class="type-desc">Behavioral & project experiences</div>
             </div>
             <div class="type-card" data-type="technical" onclick="selectType('technical', this)">
-              <span class="type-icon">💻</span>
+              <span class="type-icon" style="color:var(--blue);"><i data-lucide="code-2" style="width:32px;height:32px;"></i></span>
               <div class="type-title">Technical</div>
-              <div class="type-desc">System design & tech stack</div>
+              <div class="type-desc">System design & resume tech stack</div>
             </div>
             <div class="type-card" data-type="coding" onclick="selectType('coding', this)">
-              <span class="type-icon">🧩</span>
+              <span class="type-icon" style="color:var(--cyan);"><i data-lucide="terminal" style="width:32px;height:32px;"></i></span>
               <div class="type-title">Coding</div>
-              <div class="type-desc">DSA & algorithms</div>
+              <div class="type-desc">DSA & algorithmic problems</div>
             </div>
           </div>
 
           <div class="card" style="margin-top:24px;margin-bottom:28px;">
-            <div class="section-title" style="margin-bottom:8px;">Resume</div>
+            <div class="section-title" style="margin-bottom:8px;">Resume Context</div>
             <div id="resumeInfo" style="color:var(--text-secondary);font-size:14px;">
               Loading resume info...
             </div>
@@ -90,7 +91,7 @@
 
           <div style="text-align:center;">
             <button id="startBtn" class="btn btn-primary btn-lg" onclick="startInterview()">
-              🎤 Begin Interview
+              <i data-lucide="mic" style="width:18px;height:18px;"></i> Begin Interview (5 Questions)
             </button>
           </div>
         </div>
@@ -104,16 +105,18 @@
             <!-- Header -->
             <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
               <div style="display:flex;align-items:center;gap:12px;">
-                <div style="width:40px;height:40px;background:var(--gradient-primary);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;" id="interviewIcon">🤝</div>
+                <div style="width:40px;height:40px;background:var(--gradient-primary);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;" id="interviewIcon">
+                  <i data-lucide="users" style="width:20px;height:20px;"></i>
+                </div>
                 <div>
                   <div style="font-weight:700;" id="interviewTitle">HR Interviewer</div>
-                  <div style="font-size:12px;color:var(--green);display:flex;align-items:center;gap:4px;">
+                  <div style="font-size:12px;color:var(--green);display:flex;align-items:center;gap:6px;">
                     <span style="width:6px;height:6px;background:var(--green);border-radius:50%;display:inline-block;animation:pulse 2s infinite;"></span>
-                    Live Interview
+                    Resume-Grounded Session
                   </div>
                 </div>
               </div>
-              <span class="badge badge-purple" id="qCountBadge">Q1</span>
+              <span class="q-count-badge" id="qCountBadge">Question 1 of 5</span>
             </div>
 
             <!-- Messages -->
@@ -129,7 +132,7 @@
                   rows="2"
                 ></textarea>
                 <button id="sendBtn" class="btn btn-primary" onclick="sendAnswer()" style="height:52px;padding:0 20px;">
-                  Send ➤
+                  Send <i data-lucide="send" style="width:16px;height:16px;"></i>
                 </button>
               </div>
               <div style="font-size:12px;color:var(--text-muted);margin-top:8px;padding-left:4px;">Press Enter to send · Shift+Enter for new line</div>
@@ -140,7 +143,7 @@
           <div class="interview-sidebar">
             <div class="card" style="padding:20px;">
               <div class="section-title" style="margin-bottom:12px;">Session Progress</div>
-              <div style="font-size:28px;font-weight:800;margin-bottom:4px;" id="sideQIndex">0</div>
+              <div style="font-size:28px;font-weight:800;margin-bottom:4px;" id="sideQIndex">0 / 5</div>
               <div style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;">Questions answered</div>
               <div class="progress-bar">
                 <div class="progress-fill" id="progressFill" style="width:0%"></div>
@@ -155,15 +158,15 @@
             <div class="card" style="padding:20px;">
               <div class="section-title" style="margin-bottom:12px;">Tips</div>
               <ul class="analysis-list" style="font-size:13px;">
+                <li>Reference specific details from your projects</li>
                 <li>Use the STAR method for behavioral questions</li>
-                <li>Think aloud before diving into answers</li>
-                <li>It's okay to ask for clarification</li>
-                <li>Take your time — no rush!</li>
+                <li>Explain technical choices and trade-offs clearly</li>
+                <li>Take your time — answers are thoroughly evaluated</li>
               </ul>
             </div>
 
             <a href="/feedback.html" id="feedbackLink" class="btn btn-outline" style="display:none;width:100%;margin-top:8px;">
-              📊 View Full Feedback
+              <i data-lucide="bar-chart-3" style="width:16px;height:16px;"></i> View Full Feedback
             </a>
           </div>
         </div>
@@ -171,12 +174,12 @@
 
       <!-- END STATE -->
       <div id="endPanel" style="display:none;text-align:center;padding:80px 0;">
-        <div style="font-size:64px;margin-bottom:16px;">🎉</div>
+        <div style="font-size:56px;margin-bottom:16px;color:var(--purple-light);"><i data-lucide="award" style="width:64px;height:64px;"></i></div>
         <h2 style="font-size:28px;font-weight:800;margin-bottom:8px;">Interview Complete!</h2>
-        <p style="color:var(--text-secondary);margin-bottom:32px;">Great job! Check your feedback and study roadmap.</p>
+        <p style="color:var(--text-secondary);margin-bottom:32px;">Great job completing all 5 questions! Check your feedback and study roadmap below.</p>
         <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;">
-          <a id="finalFeedbackLink" href="/feedback.html" class="btn btn-primary btn-lg">📊 View Feedback</a>
-          <a id="finalRoadmapLink" href="/roadmap.html" class="btn btn-secondary btn-lg">🗺️ Study Roadmap</a>
+          <a id="finalFeedbackLink" href="/feedback.html" class="btn btn-primary btn-lg"><i data-lucide="bar-chart-3" style="width:18px;height:18px;"></i> View Feedback</a>
+          <a id="finalRoadmapLink" href="/roadmap.html" class="btn btn-secondary btn-lg"><i data-lucide="map" style="width:18px;height:18px;"></i> Study Roadmap</a>
         </div>
       </div>
     </div>
@@ -188,16 +191,16 @@
     let sessionId = null;
     let currentQuestionId = null;
     let currentQIndex = 0;
+    const TOTAL_QUESTIONS = 5;
     let resumeId = null;
     let isStreaming = false;
 
     const typeConfig = {
-      hr:        { title: 'HR Interviewer',        icon: '🤝' },
-      technical: { title: 'Technical Interviewer',  icon: '💻' },
-      coding:    { title: 'Coding Interviewer',     icon: '🧩' },
+      hr:        { title: 'HR Interviewer',        icon: 'users' },
+      technical: { title: 'Technical Interviewer',  icon: 'code-2' },
+      coding:    { title: 'Coding Interviewer',     icon: 'terminal' },
     };
 
-    // Init from URL params
     window.addEventListener('DOMContentLoaded', () => {
       const params = new URLSearchParams(window.location.search);
       const typeParam = params.get('type');
@@ -213,12 +216,13 @@
       const filename = Store.get('resume_filename');
       const resumeInfoEl = document.getElementById('resumeInfo');
       if (filename) {
-        resumeInfoEl.innerHTML = `<span class="badge badge-green">✓ ${filename}</span>`;
+        resumeInfoEl.innerHTML = `<span class="badge badge-green"><i data-lucide="check" style="width:12px;height:12px;"></i> ${filename}</span>`;
       } else if (resumeId) {
         resumeInfoEl.innerHTML = `<span class="badge badge-blue">Resume ID: ${resumeId}</span>`;
       } else {
-        resumeInfoEl.innerHTML = `<span style="color:var(--orange);">⚠️ No resume found. <a href="/upload.html" style="color:var(--purple-light);">Upload one</a> for personalized questions.</span>`;
+        resumeInfoEl.innerHTML = `<span style="color:var(--text-secondary);font-size:13px;">No resume uploaded — generic questions will be used. <a href="/upload.html" style="color:var(--purple-light);">Upload one</a> for personalized questions.</span>`;
       }
+      refreshIcons();
     });
 
     function selectType(type, el) {
@@ -233,41 +237,55 @@
       btn.textContent = 'Starting...';
       showLoading('Initializing your interview session...');
 
-      const result = await API.startInterview(selectedInterviewType, resumeId);
-      hideLoading();
+      try {
+        const result = await API.startInterview(selectedInterviewType, resumeId);
 
-      if (result.error) {
-        showToast(result.error, 'error');
-        btn.disabled = false;
-        btn.textContent = '🎤 Begin Interview';
-        return;
-      }
-
-      sessionId = result.session_id;
-      currentQuestionId = result.question_id;
-      currentQIndex = 0;
-
-      Store.set('session_id', sessionId);
-
-      // Update UI
-      const cfg = typeConfig[selectedInterviewType];
-      document.getElementById('interviewTitle').textContent = cfg.title;
-      document.getElementById('interviewIcon').textContent = cfg.icon;
-      document.getElementById('setupPanel').style.display = 'none';
-      document.getElementById('interviewPanel').style.display = 'block';
-      document.getElementById('endBtn').style.display = 'inline-flex';
-
-      // Add first question
-      addBubble('ai', result.question);
-      setFeedbackLinks();
-
-      // Enter key handler
-      document.getElementById('answerInput').addEventListener('keydown', e => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-          e.preventDefault();
-          sendAnswer();
+        if (result.error) {
+          showToast(result.error, 'error');
+          btn.disabled = false;
+          btn.innerHTML = `<i data-lucide="mic" style="width:18px;height:18px;"></i> Begin Interview (5 Questions)`;
+          refreshIcons();
+          return;
         }
-      });
+
+        sessionId = result.session_id;
+        currentQuestionId = result.question_id;
+        currentQIndex = 0;
+
+        Store.set('session_id', sessionId);
+
+        const cfg = typeConfig[selectedInterviewType];
+        document.getElementById('interviewTitle').textContent = cfg.title;
+        document.getElementById('interviewIcon').innerHTML = `<i data-lucide="${cfg.icon}" style="width:20px;height:20px;"></i>`;
+        document.getElementById('setupPanel').style.display = 'none';
+        document.getElementById('interviewPanel').style.display = 'block';
+        document.getElementById('endBtn').style.display = 'inline-flex';
+
+        addBubble('ai', result.question);
+        updateProgressUI();
+        setFeedbackLinks();
+
+        document.getElementById('answerInput').addEventListener('keydown', e => {
+          if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendAnswer();
+          }
+        });
+      } catch (err) {
+        showToast('Error starting interview: ' + err.message, 'error');
+        btn.disabled = false;
+        btn.innerHTML = `<i data-lucide="mic" style="width:18px;height:18px;"></i> Begin Interview (5 Questions)`;
+      } finally {
+        hideLoading();
+        refreshIcons();
+      }
+    }
+
+    function updateProgressUI() {
+      document.getElementById('qCountBadge').textContent = `Question ${Math.min(currentQIndex + 1, TOTAL_QUESTIONS)} of ${TOTAL_QUESTIONS}`;
+      document.getElementById('sideQIndex').textContent = `${currentQIndex} / ${TOTAL_QUESTIONS}`;
+      const pct = Math.min((currentQIndex / TOTAL_QUESTIONS) * 100, 100);
+      document.getElementById('progressFill').style.width = `${pct}%`;
     }
 
     function addBubble(role, text, isStreaming = false) {
@@ -278,7 +296,6 @@
         if (existing) { existing.querySelector('.bubble-body').textContent += text; messages.scrollTop = messages.scrollHeight; return; }
       }
 
-      // Remove typing indicator
       const typing = document.getElementById('typingIndicator');
       if (typing) typing.remove();
 
@@ -311,17 +328,15 @@
       const score = evalData.score || 0;
       const color = scoreColor(score);
 
-      // Sidebar
       document.getElementById('lastEvalCard').style.display = 'block';
       document.getElementById('lastScoreDisplay').innerHTML = renderScoreRing(score);
 
-      // Inline eval
       const messages = document.getElementById('chatMessages');
       const evalDiv = document.createElement('div');
       evalDiv.className = 'eval-card';
       evalDiv.innerHTML = `
         <div class="eval-score-row">
-          <span style="font-size:24px;">📊</span>
+          <span style="color:var(--purple-light);"><i data-lucide="bar-chart-2" style="width:20px;height:20px;"></i></span>
           <div>
             <div style="font-weight:700;font-size:15px;">Answer Evaluated</div>
             <div style="font-size:12px;color:var(--text-secondary);">${evalData.summary || ''}</div>
@@ -335,6 +350,7 @@
       `;
       messages.appendChild(evalDiv);
       messages.scrollTop = messages.scrollHeight;
+      refreshIcons();
     }
 
     async function sendAnswer() {
@@ -364,16 +380,27 @@
 
           if (doneData) {
             currentQuestionId = doneData.question_id;
-            currentQIndex = doneData.q_index;
           }
 
           currentQIndex++;
-          document.getElementById('sideQIndex').textContent = currentQIndex;
-          document.getElementById('qCountBadge').textContent = `Q${currentQIndex + 1}`;
-          document.getElementById('progressFill').style.width = `${Math.min(currentQIndex * 20, 100)}%`;
+          updateProgressUI();
 
           document.getElementById('sendBtn').disabled = false;
           isStreaming = false;
+        },
+        onFinished: (finishedData) => {
+          const streamBubble = document.getElementById('streamingBubble');
+          if (streamBubble) streamBubble.id = '';
+
+          currentQIndex = TOTAL_QUESTIONS;
+          updateProgressUI();
+
+          document.getElementById('inputArea').style.display = 'none';
+          showToast('Interview session complete!', 'success');
+          
+          setTimeout(() => {
+            endInterview();
+          }, 3000);
         }
       });
     }
@@ -382,15 +409,18 @@
       if (!sessionId) return;
       const fbLink = document.getElementById('feedbackLink');
       fbLink.href = `/feedback.html?session_id=${sessionId}`;
-      fbLink.style.display = 'block';
+      fbLink.style.display = 'inline-flex';
+      refreshIcons();
     }
 
     function endInterview() {
       document.getElementById('interviewPanel').style.display = 'none';
+      document.getElementById('setupPanel').style.display = 'none';
       document.getElementById('endPanel').style.display = 'block';
       document.getElementById('endBtn').style.display = 'none';
       document.getElementById('finalFeedbackLink').href = `/feedback.html?session_id=${sessionId}`;
       document.getElementById('finalRoadmapLink').href = `/roadmap.html?session_id=${sessionId}`;
+      refreshIcons();
     }
   </script>
 </body>

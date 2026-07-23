@@ -6,13 +6,40 @@
   <title>Upload Resume — PrepAI</title>
   <meta name="description" content="Upload your PDF resume for AI-powered analysis and interview preparation."/>
   <link rel="stylesheet" href="/css/style.css"/>
+  <script src="https://unpkg.com/lucide@latest"></script>
   <style>
-    .upload-success-icon { font-size: 64px; display: block; margin-bottom: 16px; }
+    .step-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+      transition: var(--transition);
+    }
+    .step-row:last-child { border-bottom: none; }
+    .step-dot {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+      flex-shrink: 0;
+      transition: var(--transition);
+    }
+    .step-dot.pending   { background: rgba(255,255,255,0.06); color: var(--text-muted); }
+    .step-dot.running   { background: rgba(139,92,246,0.2); color: var(--purple-light); animation: pulse 1.5s infinite; }
+    .step-dot.done      { background: rgba(16,185,129,0.2); color: #34d399; }
+    .step-dot.error     { background: rgba(239,68,68,0.2); color: #f87171; }
+    .step-label { flex: 1; color: var(--text-secondary); }
+    .step-label.active  { color: var(--text-primary); font-weight: 600; }
+    .step-label.done    { color: var(--text-secondary); }
+    .step-time { font-size: 12px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
   </style>
 </head>
 <body>
   <nav class="navbar">
-    <a class="navbar-brand" href="/"><div class="navbar-logo">🎯</div><span>PrepAI</span></a>
+    <a class="navbar-brand" href="/"><div class="navbar-logo"><i data-lucide="target" style="width:20px;height:20px;color:white;"></i></div><span>PrepAI</span></a>
     <ul class="navbar-nav">
       <li><a href="/">Home</a></li>
       <li><a href="/dashboard.html">Dashboard</a></li>
@@ -24,59 +51,90 @@
   </nav>
 
   <div class="page-wrapper">
-    <div class="container section" style="max-width:700px;">
+    <div class="container section" style="max-width:680px;">
       <div class="page-header">
         <h1>Upload Your Resume</h1>
-        <p>We'll analyze your resume with AI and use it to personalize your mock interviews.</p>
+        <p>PDF will be parsed instantly. AI analysis runs in the background.</p>
       </div>
 
       <!-- UPLOAD FORM -->
       <div id="uploadSection">
         <div class="upload-area" id="uploadArea">
           <input type="file" id="fileInput" accept=".pdf" aria-label="Select PDF resume"/>
-          <span class="upload-icon">📄</span>
+          <span class="upload-icon" style="color:var(--purple-light);"><i data-lucide="file-up" style="width:48px;height:48px;"></i></span>
           <div class="upload-title">Drop your PDF here</div>
-          <div class="upload-hint" style="margin-bottom:16px;">or click to browse files</div>
-          <div id="fileName" style="color:var(--purple-light);font-size:14px;font-weight:600;"></div>
+          <div class="upload-hint" style="margin-bottom:16px;">or click to browse files · Max 10MB</div>
+          <div id="fileName" style="color:var(--purple-light);font-size:14px;font-weight:600;min-height:20px;"></div>
         </div>
 
         <div style="margin-top:24px;text-align:center;">
           <button id="uploadBtn" class="btn btn-primary btn-lg" disabled>
-            <span>Upload & Analyze Resume</span>
+            Upload Resume
           </button>
         </div>
 
-        <div class="card" style="margin-top:32px;">
-          <div class="section-title" style="margin-bottom:12px;">What we analyze</div>
+        <div class="card" style="margin-top:28px;">
+          <div class="section-title" style="margin-bottom:4px;">What we extract</div>
+          <div style="font-size:12px;color:var(--text-muted);margin-bottom:14px;">All processing is done in milliseconds locally, AI analysis runs in background</div>
           <ul class="analysis-list">
-            <li>Technical skills and tech stack</li>
-            <li>Years of experience and education level</li>
-            <li>Professional strengths and areas to improve</li>
-            <li>Suitable job titles and roles</li>
-            <li>Personalized interview question topics</li>
+            <li>Technical skills &amp; tech stack</li>
+            <li>Projects &amp; past internships</li>
+            <li>Years of experience &amp; education level</li>
+            <li>Suitable job titles &amp; roles</li>
           </ul>
         </div>
       </div>
 
-      <!-- SUCCESS STATE -->
-      <div id="successSection" style="display:none;text-align:center;">
-        <div class="card" style="padding:48px;">
-          <span class="upload-success-icon">✅</span>
-          <h2 style="font-size:24px;font-weight:800;margin-bottom:8px;">Resume Uploaded!</h2>
-          <p style="color:var(--text-secondary);margin-bottom:32px;" id="successFilename"></p>
-          <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;">
-            <a id="analysisLink" href="/analysis.html" class="btn btn-primary btn-lg">View Analysis 🔍</a>
-            <a id="interviewLink" href="/interview.html" class="btn btn-secondary btn-lg">Start Interview 🎤</a>
+      <!-- PROGRESS STATE -->
+      <div id="progressSection" style="display:none;">
+        <div class="card" style="margin-bottom:24px;">
+          <div style="font-weight:700;font-size:17px;margin-bottom:4px;" id="progressTitle">Processing your resume...</div>
+          <div style="font-size:13px;color:var(--text-secondary);margin-bottom:20px;" id="progressSubtitle">This will only take a moment</div>
+
+          <div id="step1" class="step-row">
+            <div class="step-dot pending" id="dot1">1</div>
+            <div class="step-label" id="label1">Upload file to server</div>
+            <div class="step-time" id="time1"></div>
+          </div>
+          <div id="step2" class="step-row">
+            <div class="step-dot pending" id="dot2">2</div>
+            <div class="step-label" id="label2">Extract text from PDF</div>
+            <div class="step-time" id="time2"></div>
+          </div>
+          <div id="step3" class="step-row">
+            <div class="step-dot pending" id="dot3">3</div>
+            <div class="step-label" id="label3">AI analysis (Groq LLaMA 3.3)</div>
+            <div class="step-time" id="time3"></div>
+          </div>
+          <div id="step4" class="step-row">
+            <div class="step-dot pending" id="dot4">4</div>
+            <div class="step-label" id="label4">Ready for interviews</div>
+            <div class="step-time" id="time4"></div>
           </div>
         </div>
       </div>
+
+      <!-- SUCCESS STATE -->
+      <div id="successSection" style="display:none;">
+        <div class="card" style="padding:40px;text-align:center;border-color:rgba(16,185,129,0.3);">
+          <div style="font-size:48px;margin-bottom:16px;color:var(--green);"><i data-lucide="check-circle-2" style="width:48px;height:48px;"></i></div>
+          <h2 style="font-size:22px;font-weight:800;margin-bottom:6px;">Resume Ready!</h2>
+          <p style="color:var(--text-secondary);font-size:14px;margin-bottom:28px;" id="successFilename"></p>
+          <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+            <a id="analysisLink" href="/analysis.html" class="btn btn-primary">View Analysis <i data-lucide="file-search" style="width:14px;height:14px;"></i></a>
+            <a id="interviewLink" href="/interview.html" class="btn btn-secondary">Start Interview <i data-lucide="mic" style="width:14px;height:14px;"></i></a>
+            <a href="/upload.html" class="btn btn-outline" onclick="location.reload()">Upload Another</a>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 
   <script src="/js/main.js"></script>
   <script>
-    const fileInput = document.getElementById('fileInput');
-    const uploadBtn = document.getElementById('uploadBtn');
+    const fileInput  = document.getElementById('fileInput');
+    const uploadBtn  = document.getElementById('uploadBtn');
     const uploadArea = document.getElementById('uploadArea');
     const fileNameEl = document.getElementById('fileName');
     let selectedFile = null;
@@ -84,12 +142,13 @@
     fileInput.addEventListener('change', () => {
       selectedFile = fileInput.files[0];
       if (selectedFile) {
-        fileNameEl.textContent = `📎 ${selectedFile.name}`;
+        fileNameEl.innerHTML = `<i data-lucide="paperclip" style="width:14px;height:14px;"></i> ${selectedFile.name}`;
         uploadBtn.disabled = false;
+        uploadBtn.textContent = `Upload "${selectedFile.name}"`;
+        refreshIcons();
       }
     });
 
-    // Drag and drop
     uploadArea.addEventListener('dragover', e => { e.preventDefault(); uploadArea.classList.add('dragover'); });
     uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dragover'));
     uploadArea.addEventListener('drop', e => {
@@ -98,40 +157,120 @@
       const file = e.dataTransfer.files[0];
       if (file && file.type === 'application/pdf') {
         selectedFile = file;
-        fileNameEl.textContent = `📎 ${file.name}`;
+        fileNameEl.innerHTML = `<i data-lucide="paperclip" style="width:14px;height:14px;"></i> ${file.name}`;
         uploadBtn.disabled = false;
+        uploadBtn.textContent = `Upload "${file.name}"`;
+        refreshIcons();
       } else {
         showToast('Please drop a PDF file', 'error');
       }
     });
 
+    function setStep(n, state, label, ms) {
+      const dot   = document.getElementById(`dot${n}`);
+      const lbl   = document.getElementById(`label${n}`);
+      const timer = document.getElementById(`time${n}`);
+      dot.className = `step-dot ${state}`;
+      if (state === 'running')  dot.innerHTML = `<i data-lucide="loader-2" class="spin" style="width:16px;height:16px;"></i>`;
+      if (state === 'done')     dot.innerHTML = `<i data-lucide="check" style="width:16px;height:16px;"></i>`;
+      if (state === 'error')    dot.innerHTML = `<i data-lucide="x" style="width:16px;height:16px;"></i>`;
+      if (state === 'pending')  dot.textContent = n;
+      lbl.className = `step-label${state === 'running' ? ' active' : state === 'done' ? ' done' : ''}`;
+      if (label) lbl.textContent = label;
+      if (ms !== undefined) timer.textContent = `${ms}ms`;
+      refreshIcons();
+    }
+
     uploadBtn.addEventListener('click', async () => {
       if (!selectedFile) return;
-      showLoading('Uploading and parsing your resume...');
       uploadBtn.disabled = true;
 
-      const result = await API.upload(selectedFile);
-      hideLoading();
+      document.getElementById('uploadSection').style.display = 'none';
+      document.getElementById('progressSection').style.display = 'block';
 
-      if (result.error) {
-        showToast(result.error, 'error');
-        uploadBtn.disabled = false;
+      let t0, t1, t2;
+
+      setStep(1, 'running', 'Uploading file...');
+      setStep(2, 'running', 'Extracting text from PDF...');
+      t0 = Date.now();
+
+      const form = new FormData();
+      form.append('file', selectedFile);
+      let uploadResult;
+      try {
+        const res = await fetch('/api/upload-resume', { method: 'POST', body: form });
+        uploadResult = await res.json();
+      } catch (e) {
+        setStep(1, 'error', 'Upload failed');
+        showToast('Upload failed: ' + e.message, 'error');
         return;
       }
 
-      // Save resume_id
-      Store.set('resume_id', result.resume_id);
-      Store.set('resume_filename', result.filename);
+      t1 = Date.now();
+      const uploadMs = t1 - t0;
 
-      showToast('Resume uploaded successfully!', 'success');
+      if (uploadResult.error) {
+        setStep(1, 'error', uploadResult.error);
+        showToast(uploadResult.error, 'error');
+        return;
+      }
 
-      // Show success
-      document.getElementById('uploadSection').style.display = 'none';
-      const success = document.getElementById('successSection');
-      success.style.display = 'block';
-      document.getElementById('successFilename').textContent = result.filename;
-      document.getElementById('analysisLink').href = `/analysis.html?resume_id=${result.resume_id}`;
-      document.getElementById('interviewLink').href = `/interview.html?resume_id=${result.resume_id}`;
+      setStep(1, 'done', 'File uploaded', uploadMs < 200 ? uploadMs : uploadMs);
+      setStep(2, 'done', 'Text extracted from PDF', '');
+
+      Store.set('resume_id', uploadResult.resume_id);
+      Store.set('resume_filename', uploadResult.filename);
+
+      setStep(3, 'running', 'Analyzing with Groq LLaMA 3.3...');
+      t2 = Date.now();
+
+      await new Promise((resolve) => {
+        fetch(`/api/resume-summary/stream?resume_id=${uploadResult.resume_id}`)
+          .then(res => {
+            const reader = res.body.getReader();
+            const decoder = new TextDecoder();
+            let buffer = '';
+
+            function read() {
+              reader.read().then(({ done, value }) => {
+                if (done) { resolve(); return; }
+                buffer += decoder.decode(value, { stream: true });
+                const lines = buffer.split('\n');
+                buffer = lines.pop();
+
+                lines.forEach(line => {
+                  if (!line.startsWith('data: ')) return;
+                  const payload = line.slice(6);
+                  if (payload.startsWith('[DONE]') || payload.startsWith('[CACHED]')) {
+                    const analysisMs = Date.now() - t2;
+                    const isCached = payload.startsWith('[CACHED]');
+                    setStep(3, 'done',
+                      isCached ? 'Analysis loaded from cache' : 'AI analysis complete',
+                      isCached ? '<1ms' : `${analysisMs}ms`
+                    );
+                    resolve();
+                  }
+                });
+                read();
+              }).catch(() => resolve());
+            }
+            read();
+          }).catch(() => resolve());
+      });
+
+      setStep(4, 'done', 'Resume is ready for interviews!');
+      document.getElementById('progressTitle').textContent = 'Resume Ready!';
+      document.getElementById('progressSubtitle').textContent = 'All steps complete. Choose what to do next.';
+
+      await new Promise(r => setTimeout(r, 600));
+      document.getElementById('progressSection').style.display = 'none';
+      document.getElementById('successSection').style.display = 'block';
+      document.getElementById('successFilename').textContent = uploadResult.filename;
+      document.getElementById('analysisLink').href = `/analysis.html?resume_id=${uploadResult.resume_id}`;
+      document.getElementById('interviewLink').href = `/interview.html?resume_id=${uploadResult.resume_id}`;
+
+      refreshIcons();
+      showToast('Resume ready!', 'success');
     });
   </script>
 </body>

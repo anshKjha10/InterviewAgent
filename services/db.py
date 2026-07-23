@@ -16,8 +16,12 @@ def init_db():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             filename TEXT NOT NULL,
             parsed_text TEXT NOT NULL,
+            analysis_json TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
+
+        -- Add column if upgrading existing DB
+        CREATE TABLE IF NOT EXISTS resumes_v2_migration (done INTEGER);
 
         CREATE TABLE IF NOT EXISTS sessions (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -46,6 +50,35 @@ def init_db():
     """)
     conn.commit()
     conn.close()
+    # Migrate existing DB — add analysis_json column if it doesn't exist yet
+    try:
+        conn2 = get_conn()
+        conn2.execute("ALTER TABLE resumes ADD COLUMN analysis_json TEXT")
+        conn2.commit()
+        conn2.close()
+    except Exception:
+        pass  # Column already exists
+
+
+def save_analysis_cache(resume_id: int, analysis_json: str):
+    conn = get_conn()
+    conn.execute(
+        "UPDATE resumes SET analysis_json = ? WHERE id = ?",
+        (analysis_json, resume_id)
+    )
+    conn.commit()
+    conn.close()
+
+
+def get_analysis_cache(resume_id: int):
+    conn = get_conn()
+    row = conn.execute(
+        "SELECT analysis_json FROM resumes WHERE id = ?", (resume_id,)
+    ).fetchone()
+    conn.close()
+    if row and row["analysis_json"]:
+        return row["analysis_json"]
+    return None
 
 
 def insert_resume(filename, parsed_text):

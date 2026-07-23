@@ -11,13 +11,13 @@ def get_roadmap():
     resume_id = request.args.get("resume_id")
     session_id = request.args.get("session_id")
 
+    resume = None
     if resume_id:
         resume = get_resume(int(resume_id))
-    else:
+    if not resume:
         resume = get_latest_resume()
 
-    if not resume:
-        return jsonify({"error": "No resume found"}), 404
+    resume_text = resume["parsed_text"][:2000] if resume else "No resume provided. Generate a general software engineering study roadmap covering data structures, algorithms, system design, and behavioral interview prep."
 
     feedback_summary = ""
     if session_id:
@@ -32,7 +32,7 @@ def get_roadmap():
 
     system_prompt = load_prompt("roadmap_planner")
     user_msg = (
-        f"Resume:\n{resume['parsed_text'][:2000]}\n\n"
+        f"Resume:\n{resume_text}\n\n"
         f"Interview Feedback:\n{feedback_summary or 'No interview feedback yet. Generate a general roadmap based on resume skills.'}"
     )
 
@@ -47,4 +47,4 @@ def get_roadmap():
         except Exception:
             roadmap = {"raw": raw}
 
-    return jsonify({"resume_id": resume["id"], "roadmap": roadmap})
+    return jsonify({"resume_id": resume["id"] if resume else None, "roadmap": roadmap})

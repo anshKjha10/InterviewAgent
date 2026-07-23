@@ -137,7 +137,6 @@ body::before {
 /* ===================== LAYOUT ===================== */
 .page-wrapper {
   padding-top: 80px;
-  min-height: 100vh;
   position: relative;
   z-index: 1;
 }

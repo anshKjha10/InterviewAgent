@@ -6,10 +6,11 @@
   <title>Resume Analysis — PrepAI</title>
   <meta name="description" content="AI-powered analysis of your resume — skills, strengths, and improvement suggestions."/>
   <link rel="stylesheet" href="/css/style.css"/>
+  <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
   <nav class="navbar">
-    <a class="navbar-brand" href="/"><div class="navbar-logo">🎯</div><span>PrepAI</span></a>
+    <a class="navbar-brand" href="/"><div class="navbar-logo"><i data-lucide="target" style="width:20px;height:20px;color:white;"></i></div><span>PrepAI</span></a>
     <ul class="navbar-nav">
       <li><a href="/">Home</a></li>
       <li><a href="/dashboard.html">Dashboard</a></li>
@@ -17,14 +18,19 @@
       <li><a href="/interview.html">Mock Interview</a></li>
       <li><a href="/roadmap.html">Roadmap</a></li>
     </ul>
-    <a href="/interview.html" class="btn btn-primary btn-sm">Start Interview →</a>
+    <a href="/interview.html" class="btn btn-primary btn-sm">Start Interview <i data-lucide="arrow-right" style="width:14px;height:14px;"></i></a>
   </nav>
 
   <div class="page-wrapper">
     <div class="container section">
-      <div class="page-header" id="pageHeader">
-        <h1>Resume Analysis</h1>
-        <p>AI-powered breakdown of your professional profile</p>
+      <div class="page-header" id="pageHeader" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+        <div>
+          <h1>Resume Analysis</h1>
+          <p>AI-powered breakdown of your professional profile</p>
+        </div>
+        <button onclick="loadAnalysis(true)" class="btn btn-secondary btn-sm" id="refreshBtn" style="display:none;">
+          <i data-lucide="rotate-cw" style="width:14px;height:14px;"></i> Refresh Analysis
+        </button>
       </div>
 
       <!-- LOADING -->
@@ -37,7 +43,9 @@
       <div id="analysisContent" style="display:none;">
         <!-- Profile Header -->
         <div class="card card-glow" style="margin-bottom:28px;display:flex;align-items:center;gap:24px;flex-wrap:wrap;">
-          <div style="width:80px;height:80px;background:var(--gradient-primary);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:36px;flex-shrink:0;">👤</div>
+          <div style="width:72px;height:72px;background:var(--gradient-primary);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;flex-shrink:0;">
+            <i data-lucide="user" style="width:36px;height:36px;"></i>
+          </div>
           <div style="flex:1;">
             <h2 id="candidateName" style="font-size:24px;font-weight:800;margin-bottom:4px;"></h2>
             <p id="candidateSummary" style="color:var(--text-secondary);font-size:14px;line-height:1.6;"></p>
@@ -51,14 +59,20 @@
         <div class="grid-2" style="margin-bottom:28px;">
           <!-- Skills -->
           <div class="card">
-            <div class="section-title" style="margin-bottom:16px;">🛠 Technical Skills</div>
+            <div class="section-title" style="margin-bottom:16px;display:flex;align-items:center;gap:8px;color:var(--purple-light);">
+              <i data-lucide="cpu" style="width:18px;height:18px;"></i> Technical Skills
+            </div>
             <div class="skill-tags" id="skillTags"></div>
           </div>
           <!-- Education -->
           <div class="card">
-            <div class="section-title" style="margin-bottom:16px;">🎓 Education</div>
+            <div class="section-title" style="margin-bottom:16px;display:flex;align-items:center;gap:8px;color:var(--blue);">
+              <i data-lucide="graduation-cap" style="width:18px;height:18px;"></i> Education
+            </div>
             <div id="educationText" style="font-size:15px;font-weight:600;margin-bottom:16px;"></div>
-            <div class="section-title" style="margin-bottom:12px;">💼 Suitable Roles</div>
+            <div class="section-title" style="margin-bottom:12px;display:flex;align-items:center;gap:8px;color:var(--cyan);">
+              <i data-lucide="briefcase" style="width:18px;height:18px;"></i> Suitable Roles
+            </div>
             <div id="jobTitles" class="skill-tags"></div>
           </div>
         </div>
@@ -66,12 +80,16 @@
         <div class="grid-2" style="margin-bottom:32px;">
           <!-- Strengths -->
           <div class="card" style="border-color:rgba(16,185,129,0.2);">
-            <div class="section-title" style="margin-bottom:12px;color:#34d399;">✅ Key Strengths</div>
+            <div class="section-title" style="margin-bottom:12px;color:#34d399;display:flex;align-items:center;gap:8px;">
+              <i data-lucide="check-circle-2" style="width:18px;height:18px;"></i> Key Strengths
+            </div>
             <ul class="analysis-list" id="strengthsList"></ul>
           </div>
           <!-- Improvements -->
           <div class="card" style="border-color:rgba(245,158,11,0.2);">
-            <div class="section-title" style="margin-bottom:12px;color:#fbbf24;">⚡ Areas to Improve</div>
+            <div class="section-title" style="margin-bottom:12px;color:#fbbf24;display:flex;align-items:center;gap:8px;">
+              <i data-lucide="zap" style="width:18px;height:18px;"></i> Areas to Improve
+            </div>
             <ul class="analysis-list" id="improvementsList"></ul>
           </div>
         </div>
@@ -79,39 +97,64 @@
         <!-- CTA -->
         <div class="card" style="text-align:center;padding:40px;background:linear-gradient(135deg,rgba(139,92,246,0.08),rgba(59,130,246,0.08));border-color:rgba(139,92,246,0.2);">
           <h3 style="font-size:20px;font-weight:700;margin-bottom:8px;">Ready to Practice?</h3>
-          <p style="color:var(--text-secondary);margin-bottom:24px;">Start a mock interview tailored to your resume and get real-time feedback.</p>
+          <p style="color:var(--text-secondary);margin-bottom:24px;">Start a 5-question mock interview tailored directly to your resume projects & experience.</p>
           <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;">
-            <a id="hrLink" href="/interview.html?type=hr" class="btn btn-secondary">🤝 HR Interview</a>
-            <a id="techLink" href="/interview.html?type=technical" class="btn btn-primary">💻 Technical Interview</a>
-            <a id="codeLink" href="/interview.html?type=coding" class="btn btn-secondary">🧩 Coding Interview</a>
+            <a id="hrLink" href="/interview.html?type=hr" class="btn btn-secondary"><i data-lucide="users" style="width:16px;height:16px;"></i> HR Interview</a>
+            <a id="techLink" href="/interview.html?type=technical" class="btn btn-primary"><i data-lucide="code-2" style="width:16px;height:16px;"></i> Technical Interview</a>
+            <a id="codeLink" href="/interview.html?type=coding" class="btn btn-secondary"><i data-lucide="terminal" style="width:16px;height:16px;"></i> Coding Interview</a>
           </div>
         </div>
       </div>
 
       <!-- ERROR STATE -->
       <div id="errorState" style="display:none;" class="empty-state">
-        <span class="empty-state-icon">⚠️</span>
+        <span class="empty-state-icon" style="color:var(--orange);"><i data-lucide="alert-triangle" style="width:48px;height:48px;"></i></span>
         <h3>No Resume Found</h3>
         <p>Please upload a resume first to see the analysis.</p>
-        <a href="/upload.html" class="btn btn-primary" style="margin-top:20px;">Upload Resume →</a>
+        <a href="/upload.html" class="btn btn-primary" style="margin-top:20px;">Upload Resume <i data-lucide="arrow-right" style="width:14px;height:14px;"></i></a>
       </div>
     </div>
   </div>
 
   <script src="/js/main.js"></script>
   <script>
-    async function loadAnalysis() {
-      const params = new URLSearchParams(window.location.search);
-      const resumeId = params.get('resume_id') || Store.get('resume_id');
+    let currentResumeId = null;
 
-      const data = await API.summary(resumeId);
+    async function loadAnalysis(forceRefresh = false) {
+      const params = new URLSearchParams(window.location.search);
+      currentResumeId = params.get('resume_id') || Store.get('resume_id');
+
+      document.getElementById('loadingState').style.display = 'block';
+      document.getElementById('analysisContent').style.display = 'none';
+      document.getElementById('errorState').style.display = 'none';
+
+      const url = `/api/resume-summary${currentResumeId ? `?resume_id=${currentResumeId}` : ''}${forceRefresh ? (currentResumeId ? '&refresh=true' : '?refresh=true') : ''}`;
+      let data;
+      try {
+        const res = await fetch(url);
+        data = await res.json();
+      } catch(e) {
+        document.getElementById('loadingState').style.display = 'none';
+        document.getElementById('errorState').style.display = 'block';
+        refreshIcons();
+        return;
+      }
 
       document.getElementById('loadingState').style.display = 'none';
 
       if (data.error) {
         document.getElementById('errorState').style.display = 'block';
+        refreshIcons();
         return;
       }
+
+      document.getElementById('refreshBtn').style.display = 'inline-flex';
+
+      const titleEl = document.querySelector('.page-header h1');
+      const cachedBadge = data.cached
+        ? `<span class="badge badge-green" style="font-size:11px;margin-left:12px;"><i data-lucide="zap" style="width:12px;height:12px;"></i> Cached</span>`
+        : `<span class="badge badge-purple" style="font-size:11px;margin-left:12px;"><i data-lucide="sparkles" style="width:12px;height:12px;"></i> Fresh</span>`;
+      titleEl.innerHTML = `Resume Analysis ${cachedBadge}`;
 
       const a = data.analysis || {};
       document.getElementById('analysisContent').style.display = 'block';
@@ -120,37 +163,35 @@
       document.getElementById('expYears').textContent = `${a.experience_years || '?'} yrs`;
       document.getElementById('educationText').textContent = a.education || '—';
 
-      // Skills
       const skills = a.skills || [];
       document.getElementById('skillTags').innerHTML = skills.map(s =>
         `<span class="skill-tag">${s}</span>`
       ).join('');
 
-      // Job titles
       const titles = a.job_titles || [];
       document.getElementById('jobTitles').innerHTML = titles.map(t =>
         `<span class="badge badge-purple">${t}</span>`
       ).join('');
 
-      // Strengths
       const strengths = a.strengths || [];
       document.getElementById('strengthsList').innerHTML = strengths.map(s =>
         `<li>${s}</li>`
       ).join('');
 
-      // Improvements
       const improvements = a.improvements || [];
       document.getElementById('improvementsList').innerHTML = improvements.map(i =>
         `<li>${i}</li>`
       ).join('');
 
-      // Set interview links with resume_id
-      if (resumeId) {
+      if (currentResumeId) {
         ['hrLink','techLink','codeLink'].forEach((id, idx) => {
           const types = ['hr', 'technical', 'coding'];
-          document.getElementById(id).href = `/interview.html?type=${types[idx]}&resume_id=${resumeId}`;
+          document.getElementById(id).href = `/interview.html?type=${types[idx]}&resume_id=${currentResumeId}`;
         });
       }
+
+      refreshIcons();
+      if (data.cached) showToast('Analysis loaded from cache (instant!)', 'success');
     }
 
     loadAnalysis();

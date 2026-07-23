@@ -1,15 +1,26 @@
 // ===================== UTILITIES =====================
 const API = {
+  async handleResponse(res) {
+    try {
+      const data = await res.json();
+      if (!res.ok && !data.error) {
+        data.error = `HTTP Error ${res.status}`;
+      }
+      return data;
+    } catch (e) {
+      return { error: `Server error (${res.status}): ${res.statusText || 'Unexpected response'}` };
+    }
+  },
   async upload(file) {
     const form = new FormData();
     form.append('file', file);
     const res = await fetch('/api/upload-resume', { method: 'POST', body: form });
-    return res.json();
+    return this.handleResponse(res);
   },
   async summary(resumeId) {
     const q = resumeId ? `?resume_id=${resumeId}` : '';
     const res = await fetch(`/api/resume-summary${q}`);
-    return res.json();
+    return this.handleResponse(res);
   },
   async startInterview(interviewType, resumeId) {
     const res = await fetch('/api/mock-interview/start', {
@@ -17,11 +28,11 @@ const API = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ interview_type: interviewType, resume_id: resumeId })
     });
-    return res.json();
+    return this.handleResponse(res);
   },
   async getFeedback(sessionId) {
     const res = await fetch(`/api/feedback?session_id=${sessionId}`);
-    return res.json();
+    return this.handleResponse(res);
   },
   async getRoadmap(resumeId, sessionId) {
     let url = '/api/roadmap';
@@ -48,6 +59,13 @@ const Store = {
   clear(key) { localStorage.removeItem(`aip_${key}`); }
 };
 
+// ===================== LUCIDE ICON REFRESH =====================
+function refreshIcons() {
+  if (typeof lucide !== 'undefined' && lucide.createIcons) {
+    lucide.createIcons();
+  }
+}
+
 // ===================== TOAST =====================
 function showToast(msg, type = 'info') {
   let container = document.getElementById('toastContainer');
@@ -57,12 +75,18 @@ function showToast(msg, type = 'info') {
     container.className = 'toast-container';
     document.body.appendChild(container);
   }
-  const icons = { success: '✅', error: '❌', info: '💜' };
+  const iconNames = { success: 'check-circle-2', error: 'alert-circle', info: 'sparkles' };
   const toast = document.createElement('div');
   toast.className = `toast toast-${type}`;
-  toast.innerHTML = `<span>${icons[type]}</span><span>${msg}</span>`;
+  toast.innerHTML = `<i data-lucide="${iconNames[type] || 'info'}" style="width:18px;height:18px;"></i><span>${msg}</span>`;
   container.appendChild(toast);
-  setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateX(40px)'; toast.style.transition = '0.3s'; setTimeout(() => toast.remove(), 300); }, 3500);
+  refreshIcons();
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateX(40px)';
+    toast.style.transition = '0.3s';
+    setTimeout(() => toast.remove(), 300);
+  }, 3500);
 }
 
 // ===================== LOADING =====================
@@ -93,6 +117,7 @@ function setNavActive() {
       a.classList.add('active');
     }
   });
+  refreshIcons();
 }
 
 document.addEventListener('DOMContentLoaded', setNavActive);
@@ -133,7 +158,7 @@ function renderScoreRing(score, maxScore = 10) {
 }
 
 // ===================== SSE ANSWER STREAM =====================
-function streamAnswer({ sessionId, questionId, answer, qIndex, onEval, onChunk, onDone }) {
+function streamAnswer({ sessionId, questionId, answer, qIndex, onEval, onChunk, onDone, onFinished }) {
   fetch('/api/mock-interview/answer', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -161,6 +186,9 @@ function streamAnswer({ sessionId, questionId, answer, qIndex, onEval, onChunk, 
           if (payload.startsWith('[EVAL]')) {
             const evalData = JSON.parse(payload.slice(6));
             onEval && onEval(evalData);
+          } else if (payload.startsWith('[FINISHED]')) {
+            const finishedData = JSON.parse(payload.slice(10));
+            onFinished && onFinished(finishedData);
           } else if (payload.startsWith('[DONE]')) {
             const doneData = JSON.parse(payload.slice(6));
             onDone && onDone(doneData);

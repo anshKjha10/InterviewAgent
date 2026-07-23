@@ -6,10 +6,11 @@
   <title>Interview Feedback — PrepAI</title>
   <meta name="description" content="Detailed feedback and scoring from your PrepAI mock interview session."/>
   <link rel="stylesheet" href="/css/style.css"/>
+  <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
   <nav class="navbar">
-    <a class="navbar-brand" href="/"><div class="navbar-logo">🎯</div><span>PrepAI</span></a>
+    <a class="navbar-brand" href="/"><div class="navbar-logo"><i data-lucide="target" style="width:20px;height:20px;color:white;"></i></div><span>PrepAI</span></a>
     <ul class="navbar-nav">
       <li><a href="/">Home</a></li>
       <li><a href="/dashboard.html">Dashboard</a></li>
@@ -17,7 +18,7 @@
       <li><a href="/interview.html">Mock Interview</a></li>
       <li><a href="/roadmap.html">Roadmap</a></li>
     </ul>
-    <a href="/roadmap.html" class="btn btn-primary btn-sm">Get Roadmap →</a>
+    <a href="/roadmap.html" class="btn btn-primary btn-sm">Get Roadmap <i data-lucide="arrow-right" style="width:14px;height:14px;"></i></a>
   </nav>
 
   <div class="page-wrapper">
@@ -36,22 +37,22 @@
         <!-- OVERVIEW CARDS -->
         <div class="grid-4" style="margin-bottom:32px;">
           <div class="stat-card">
-            <div class="stat-icon" style="background:rgba(139,92,246,0.15);">🎯</div>
+            <div class="stat-icon" style="background:rgba(139,92,246,0.15);color:var(--purple-light);"><i data-lucide="target" style="width:22px;height:22px;"></i></div>
             <div class="stat-value gradient-text" id="avgScoreDisplay">—</div>
             <div class="stat-label">Average Score</div>
           </div>
           <div class="stat-card">
-            <div class="stat-icon" style="background:rgba(59,130,246,0.15);">❓</div>
+            <div class="stat-icon" style="background:rgba(59,130,246,0.15);color:var(--blue);"><i data-lucide="help-circle" style="width:22px;height:22px;"></i></div>
             <div class="stat-value" style="color:var(--blue);" id="totalQDisplay">—</div>
             <div class="stat-label">Total Questions</div>
           </div>
           <div class="stat-card">
-            <div class="stat-icon" style="background:rgba(16,185,129,0.15);">✅</div>
+            <div class="stat-icon" style="background:rgba(16,185,129,0.15);color:var(--green);"><i data-lucide="check-circle-2" style="width:22px;height:22px;"></i></div>
             <div class="stat-value" style="color:var(--green);" id="answeredDisplay">—</div>
             <div class="stat-label">Answered</div>
           </div>
           <div class="stat-card">
-            <div class="stat-icon" style="background:rgba(245,158,11,0.15);">🏆</div>
+            <div class="stat-icon" style="background:rgba(245,158,11,0.15);color:var(--orange);"><i data-lucide="award" style="width:22px;height:22px;"></i></div>
             <div class="stat-value" style="color:var(--orange);" id="gradeDisplay">—</div>
             <div class="stat-label">Grade</div>
           </div>
@@ -66,8 +67,8 @@
             <p id="overallSummary" style="color:var(--text-secondary);font-size:14px;line-height:1.6;"></p>
           </div>
           <div style="flex-shrink:0;display:flex;gap:12px;flex-wrap:wrap;">
-            <a href="/interview.html" class="btn btn-secondary">🔄 Retake Interview</a>
-            <a href="/roadmap.html" id="roadmapBtn" class="btn btn-primary">🗺️ Study Roadmap</a>
+            <a href="/interview.html" class="btn btn-secondary"><i data-lucide="rotate-ccw" style="width:16px;height:16px;"></i> Retake Interview</a>
+            <a href="/roadmap.html" id="roadmapBtn" class="btn btn-primary"><i data-lucide="map" style="width:16px;height:16px;"></i> Study Roadmap</a>
           </div>
         </div>
 
@@ -77,10 +78,10 @@
       </div>
 
       <div id="errorState" style="display:none;" class="empty-state">
-        <span class="empty-state-icon">📭</span>
+        <span class="empty-state-icon" style="color:var(--text-muted);"><i data-lucide="inbox" style="width:48px;height:48px;"></i></span>
         <h3>No Feedback Available</h3>
         <p>Complete a mock interview session to see detailed feedback here.</p>
-        <a href="/interview.html" class="btn btn-primary" style="margin-top:20px;">Start Interview →</a>
+        <a href="/interview.html" class="btn btn-primary" style="margin-top:20px;">Start Interview <i data-lucide="arrow-right" style="width:14px;height:14px;"></i></a>
       </div>
     </div>
   </div>
@@ -94,6 +95,7 @@
       if (!sessionId) {
         document.getElementById('loadingState').style.display = 'none';
         document.getElementById('errorState').style.display = 'block';
+        refreshIcons();
         return;
       }
 
@@ -102,6 +104,7 @@
 
       if (data.error || !data.details) {
         document.getElementById('errorState').style.display = 'block';
+        refreshIcons();
         return;
       }
 
@@ -114,7 +117,6 @@
       document.getElementById('answeredDisplay').textContent = data.answered;
       document.getElementById('gradeDisplay').textContent = scoreGrade(avg);
 
-      // Overall ring
       document.getElementById('overallRing').innerHTML = renderScoreRing(avg);
       document.getElementById('overallProgress').innerHTML = `<div class="progress-fill" style="width:${avg*10}%;background:linear-gradient(90deg,${scoreColor(avg)},${scoreColor(avg)}aa)"></div>`;
       document.getElementById('overallSummary').textContent =
@@ -122,10 +124,8 @@
         avg >= 6 ? 'Good performance. With some focused practice you\'ll be interview-ready.' :
         'There\'s room for improvement. Use the study roadmap to address your gaps.';
 
-      // Roadmap link
       document.getElementById('roadmapBtn').href = `/roadmap.html?session_id=${sessionId}`;
 
-      // Question breakdown
       const breakdown = document.getElementById('questionBreakdown');
       breakdown.innerHTML = (data.details || []).map((item, i) => {
         const score = item.score || 0;
@@ -154,9 +154,10 @@
             </div>` : ''}
         </div>`;
       }).join('');
+
+      refreshIcons();
     }
 
-    // Helper reuse from main.js
     function scoreGrade(s) {
       if (s >= 9) return 'A+';
       if (s >= 8) return 'A';
