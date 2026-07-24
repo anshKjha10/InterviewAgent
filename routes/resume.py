@@ -12,6 +12,14 @@ resume_bp = Blueprint("resume", __name__)
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 
+def get_user_token():
+    return (
+        request.headers.get("X-User-Token")
+        or request.args.get("user_token")
+        or (request.form.get("user_token") if request.form else None)
+    )
+
+
 def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
@@ -45,7 +53,8 @@ def upload_resume():
     if not parsed_text.strip():
         return jsonify({"error": "Could not extract text from PDF"}), 400
 
-    resume_id = insert_resume(filename, parsed_text)
+    user_token = get_user_token()
+    resume_id = insert_resume(filename, parsed_text, user_token=user_token)
     return jsonify({"resume_id": resume_id, "filename": filename, "message": "Resume uploaded successfully"})
 
 
@@ -53,14 +62,15 @@ def upload_resume():
 def resume_summary():
     resume_id = request.args.get("resume_id")
     force_refresh = request.args.get("refresh", "false").lower() == "true"
+    user_token = get_user_token()
 
     if resume_id:
-        resume = get_resume(int(resume_id))
+        resume = get_resume(int(resume_id), user_token=user_token)
     else:
-        resume = get_latest_resume()
+        resume = get_latest_resume(user_token=user_token)
 
     if not resume:
-        return jsonify({"error": "No resume found"}), 404
+        return jsonify({"error": "No resume found for your session"}), 404
 
     if not force_refresh:
         cached = get_analysis_cache(resume["id"])
@@ -90,14 +100,15 @@ def resume_summary():
 def resume_summary_stream():
     resume_id = request.args.get("resume_id")
     force_refresh = request.args.get("refresh", "false").lower() == "true"
+    user_token = get_user_token()
 
     if resume_id:
-        resume = get_resume(int(resume_id))
+        resume = get_resume(int(resume_id), user_token=user_token)
     else:
-        resume = get_latest_resume()
+        resume = get_latest_resume(user_token=user_token)
 
     if not resume:
-        return jsonify({"error": "No resume found"}), 404
+        return jsonify({"error": "No resume found for your session"}), 404
 
     if not force_refresh:
         cached = get_analysis_cache(resume["id"])

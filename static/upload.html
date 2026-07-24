@@ -195,8 +195,7 @@
       form.append('file', selectedFile);
       let uploadResult;
       try {
-        const res = await fetch('/api/upload-resume', { method: 'POST', body: form });
-        uploadResult = await res.json();
+        uploadResult = await API.upload(selectedFile);
       } catch (e) {
         setStep(1, 'error', 'Upload failed');
         showToast('Upload failed: ' + e.message, 'error');
@@ -222,7 +221,9 @@
       t2 = Date.now();
 
       await new Promise((resolve) => {
-        fetch(`/api/resume-summary/stream?resume_id=${uploadResult.resume_id}`)
+        fetch(`/api/resume-summary/stream?resume_id=${uploadResult.resume_id}&user_token=${Store.getUserToken()}`, {
+          headers: { 'X-User-Token': Store.getUserToken() }
+        })
           .then(res => {
             const reader = res.body.getReader();
             const decoder = new TextDecoder();

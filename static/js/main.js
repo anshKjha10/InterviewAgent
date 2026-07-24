@@ -1,3 +1,20 @@
+const Store = {
+  set(key, val) { localStorage.setItem(`aip_${key}`, JSON.stringify(val)); },
+  get(key) {
+    try { return JSON.parse(localStorage.getItem(`aip_${key}`)); }
+    catch { return null; }
+  },
+  clear(key) { localStorage.removeItem(`aip_${key}`); },
+  getUserToken() {
+    let token = localStorage.getItem('aip_user_token');
+    if (!token) {
+      token = 'usr_' + Math.random().toString(36).substring(2, 15) + Date.now().toString(36);
+      localStorage.setItem('aip_user_token', token);
+    }
+    return token;
+  }
+};
+
 const API = {
   async handleResponse(res) {
     try {
@@ -13,24 +30,36 @@ const API = {
   async upload(file) {
     const form = new FormData();
     form.append('file', file);
-    const res = await fetch('/api/upload-resume', { method: 'POST', body: form });
+    form.append('user_token', Store.getUserToken());
+    const res = await fetch('/api/upload-resume', {
+      method: 'POST',
+      headers: { 'X-User-Token': Store.getUserToken() },
+      body: form
+    });
     return this.handleResponse(res);
   },
   async summary(resumeId) {
     const q = resumeId ? `?resume_id=${resumeId}` : '';
-    const res = await fetch(`/api/resume-summary${q}`);
+    const res = await fetch(`/api/resume-summary${q}`, {
+      headers: { 'X-User-Token': Store.getUserToken() }
+    });
     return this.handleResponse(res);
   },
   async startInterview(interviewType, resumeId) {
     const res = await fetch('/api/mock-interview/start', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ interview_type: interviewType, resume_id: resumeId })
+      headers: {
+        'Content-Type': 'application/json',
+        'X-User-Token': Store.getUserToken()
+      },
+      body: JSON.stringify({ interview_type: interviewType, resume_id: resumeId, user_token: Store.getUserToken() })
     });
     return this.handleResponse(res);
   },
   async getFeedback(sessionId) {
-    const res = await fetch(`/api/feedback?session_id=${sessionId}`);
+    const res = await fetch(`/api/feedback?session_id=${sessionId}`, {
+      headers: { 'X-User-Token': Store.getUserToken() }
+    });
     return this.handleResponse(res);
   },
   async getRoadmap(resumeId, sessionId) {
@@ -39,22 +68,17 @@ const API = {
     if (resumeId) params.push(`resume_id=${resumeId}`);
     if (sessionId) params.push(`session_id=${sessionId}`);
     if (params.length) url += '?' + params.join('&');
-    const res = await fetch(url);
+    const res = await fetch(url, {
+      headers: { 'X-User-Token': Store.getUserToken() }
+    });
     return res.json();
   },
   async getSessions() {
-    const res = await fetch('/api/sessions');
+    const res = await fetch('/api/sessions', {
+      headers: { 'X-User-Token': Store.getUserToken() }
+    });
     return res.json();
   }
-};
-
-const Store = {
-  set(key, val) { localStorage.setItem(`aip_${key}`, JSON.stringify(val)); },
-  get(key) {
-    try { return JSON.parse(localStorage.getItem(`aip_${key}`)); }
-    catch { return null; }
-  },
-  clear(key) { localStorage.removeItem(`aip_${key}`); }
 };
 
 function refreshIcons() {
@@ -152,12 +176,16 @@ function renderScoreRing(score, maxScore = 10) {
 function streamAnswer({ sessionId, questionId, answer, qIndex, onEval, onChunk, onDone, onFinished }) {
   fetch('/api/mock-interview/answer', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'X-User-Token': Store.getUserToken()
+    },
     body: JSON.stringify({
       session_id: sessionId,
       question_id: questionId,
       answer: answer,
-      q_index: qIndex
+      q_index: qIndex,
+      user_token: Store.getUserToken()
     })
   }).then(res => {
     const reader = res.body.getReader();

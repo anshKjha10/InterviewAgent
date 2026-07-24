@@ -17,6 +17,14 @@ INTERVIEW_PROMPT_MAP = {
 }
 
 
+def get_user_token():
+    if request.is_json and request.get_json(silent=True):
+        body_token = request.get_json().get("user_token")
+        if body_token:
+            return body_token
+    return request.headers.get("X-User-Token") or request.args.get("user_token")
+
+
 def build_resume_context(resume):
     if not resume:
         return "No resume provided. Ask questions based on a general software engineering candidate background."
@@ -43,15 +51,16 @@ def build_resume_context(resume):
 
 @interview_bp.route("/api/mock-interview/start", methods=["POST"])
 def start_interview():
-    data = request.get_json()
+    data = request.get_json() or {}
     interview_type = data.get("interview_type", "hr")
     resume_id = data.get("resume_id")
+    user_token = get_user_token()
 
     resume = None
     if resume_id:
-        resume = get_resume(int(resume_id))
+        resume = get_resume(int(resume_id), user_token=user_token)
     if not resume:
-        resume = get_latest_resume()
+        resume = get_latest_resume(user_token=user_token)
 
     resume_text = build_resume_context(resume)
     resume_db_id = resume["id"] if resume else None
@@ -60,7 +69,7 @@ def start_interview():
         return jsonify({"error": f"Unknown interview type: {interview_type}"}), 400
 
     try:
-        session_id = create_session(resume_db_id, interview_type)
+        session_id = create_session(resume_db_id, interview_type, user_token=user_token)
         prompt_name = INTERVIEW_PROMPT_MAP[interview_type]
         system_prompt = load_prompt(prompt_name)
 
@@ -87,7 +96,7 @@ def start_interview():
 
 @interview_bp.route("/api/mock-interview/answer", methods=["POST"])
 def answer_question():
-    data = request.get_json()
+    data = request.get_json() or {}
     session_id = data.get("session_id")
     question_id = data.get("question_id")
     answer_text = data.get("answer")

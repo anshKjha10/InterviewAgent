@@ -5,6 +5,10 @@ from services.db import get_session_history, get_all_sessions
 feedback_bp = Blueprint("feedback", __name__)
 
 
+def get_user_token():
+    return request.headers.get("X-User-Token") or request.args.get("user_token")
+
+
 @feedback_bp.route("/api/feedback", methods=["GET"])
 def get_feedback():
     session_id = request.args.get("session_id")
@@ -49,5 +53,6 @@ def get_feedback():
 
 @feedback_bp.route("/api/sessions", methods=["GET"])
 def list_sessions():
-    sessions = get_all_sessions()
+    user_token = get_user_token()
+    sessions = get_all_sessions(user_token=user_token)
     return jsonify({"sessions": sessions})

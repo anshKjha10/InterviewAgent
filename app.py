@@ -37,6 +37,7 @@ def health():
 
 if __name__ == "__main__":
     init_db()
+    port = int(os.getenv("PORT", 5000))
     print("[OK] Database initialized")
-    print("[START] Starting AI Interview Prep Assistant on http://0.0.0.0:5000")
-    app.run(host="0.0.0.0", port=5000, debug=FLASK_DEBUG, threaded=True)
+    print(f"[START] Starting AI Interview Prep Assistant on http://0.0.0.0:{port}")
+    app.run(host="0.0.0.0", port=port, debug=FLASK_DEBUG, threaded=True)

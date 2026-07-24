@@ -17,15 +17,15 @@ def init_db():
             filename TEXT NOT NULL,
             parsed_text TEXT NOT NULL,
             analysis_json TEXT,
+            user_token TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
-
-        CREATE TABLE IF NOT EXISTS resumes_v2_migration (done INTEGER);
 
         CREATE TABLE IF NOT EXISTS sessions (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             resume_id INTEGER,
             interview_type TEXT NOT NULL,
+            user_token TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (resume_id) REFERENCES resumes(id)
         );
@@ -49,11 +49,28 @@ def init_db():
     """)
     conn.commit()
     conn.close()
+
     try:
         conn2 = get_conn()
         conn2.execute("ALTER TABLE resumes ADD COLUMN analysis_json TEXT")
         conn2.commit()
         conn2.close()
+    except Exception:
+        pass
+
+    try:
+        conn3 = get_conn()
+        conn3.execute("ALTER TABLE resumes ADD COLUMN user_token TEXT")
+        conn3.commit()
+        conn3.close()
+    except Exception:
+        pass
+
+    try:
+        conn4 = get_conn()
+        conn4.execute("ALTER TABLE sessions ADD COLUMN user_token TEXT")
+        conn4.commit()
+        conn4.close()
     except Exception:
         pass
 
@@ -79,12 +96,12 @@ def get_analysis_cache(resume_id: int):
     return None
 
 
-def insert_resume(filename, parsed_text):
+def insert_resume(filename, parsed_text, user_token=None):
     conn = get_conn()
     c = conn.cursor()
     c.execute(
-        "INSERT INTO resumes (filename, parsed_text) VALUES (?, ?)",
-        (filename, parsed_text)
+        "INSERT INTO resumes (filename, parsed_text, user_token) VALUES (?, ?, ?)",
+        (filename, parsed_text, user_token)
     )
     conn.commit()
     resume_id = c.lastrowid
@@ -92,26 +109,38 @@ def insert_resume(filename, parsed_text):
     return resume_id
 
 
-def get_resume(resume_id):
+def get_resume(resume_id, user_token=None):
     conn = get_conn()
-    row = conn.execute("SELECT * FROM resumes WHERE id = ?", (resume_id,)).fetchone()
+    if user_token:
+        row = conn.execute(
+            "SELECT * FROM resumes WHERE id = ? AND (user_token = ? OR user_token IS NULL)",
+            (resume_id, user_token)
+        ).fetchone()
+    else:
+        row = conn.execute("SELECT * FROM resumes WHERE id = ?", (resume_id,)).fetchone()
     conn.close()
     return dict(row) if row else None
 
 
-def get_latest_resume():
+def get_latest_resume(user_token=None):
     conn = get_conn()
-    row = conn.execute("SELECT * FROM resumes ORDER BY created_at DESC LIMIT 1").fetchone()
+    if user_token:
+        row = conn.execute(
+            "SELECT * FROM resumes WHERE user_token = ? ORDER BY created_at DESC LIMIT 1",
+            (user_token,)
+        ).fetchone()
+    else:
+        row = conn.execute("SELECT * FROM resumes ORDER BY created_at DESC LIMIT 1").fetchone()
     conn.close()
     return dict(row) if row else None
 
 
-def create_session(resume_id, interview_type):
+def create_session(resume_id, interview_type, user_token=None):
     conn = get_conn()
     c = conn.cursor()
     c.execute(
-        "INSERT INTO sessions (resume_id, interview_type) VALUES (?, ?)",
-        (resume_id, interview_type)
+        "INSERT INTO sessions (resume_id, interview_type, user_token) VALUES (?, ?, ?)",
+        (resume_id, interview_type, user_token)
     )
     conn.commit()
     session_id = c.lastrowid
@@ -163,15 +192,26 @@ def get_session_history(session_id):
     return [dict(r) for r in rows]
 
 
-def get_all_sessions():
+def get_all_sessions(user_token=None):
     conn = get_conn()
-    rows = conn.execute("""
-        SELECT s.*, r.filename, COUNT(q.id) as q_count
-        FROM sessions s
-        LEFT JOIN resumes r ON r.id = s.resume_id
-        LEFT JOIN questions q ON q.session_id = s.id
-        GROUP BY s.id
-        ORDER BY s.created_at DESC
-    """).fetchall()
+    if user_token:
+        rows = conn.execute("""
+            SELECT s.*, r.filename, COUNT(q.id) as q_count
+            FROM sessions s
+            LEFT JOIN resumes r ON r.id = s.resume_id
+            LEFT JOIN questions q ON q.session_id = s.id
+            WHERE s.user_token = ? OR s.user_token IS NULL
+            GROUP BY s.id
+            ORDER BY s.created_at DESC
+        """, (user_token,)).fetchall()
+    else:
+        rows = conn.execute("""
+            SELECT s.*, r.filename, COUNT(q.id) as q_count
+            FROM sessions s
+            LEFT JOIN resumes r ON r.id = s.resume_id
+            LEFT JOIN questions q ON q.session_id = s.id
+            GROUP BY s.id
+            ORDER BY s.created_at DESC
+        """).fetchall()
     conn.close()
     return [dict(r) for r in rows]

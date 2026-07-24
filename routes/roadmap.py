@@ -6,16 +6,21 @@ from services.llm import chat_complete, load_prompt
 roadmap_bp = Blueprint("roadmap", __name__)
 
 
+def get_user_token():
+    return request.headers.get("X-User-Token") or request.args.get("user_token")
+
+
 @roadmap_bp.route("/api/roadmap", methods=["GET"])
 def get_roadmap():
     resume_id = request.args.get("resume_id")
     session_id = request.args.get("session_id")
+    user_token = get_user_token()
 
     resume = None
     if resume_id:
-        resume = get_resume(int(resume_id))
+        resume = get_resume(int(resume_id), user_token=user_token)
     if not resume:
-        resume = get_latest_resume()
+        resume = get_latest_resume(user_token=user_token)
 
     resume_text = resume["parsed_text"][:2000] if resume else "No resume provided. Generate a general software engineering study roadmap covering data structures, algorithms, system design, and behavioral interview prep."
 
