@@ -19,6 +19,7 @@ Powered by **Flask**, **SQLite**, and **Groq LLaMA 3.3 70B**, PrepAI delivers a 
 * **⚡ Real-Time Streaming Responses**: Powered by Groq's low-latency LLaMA 3.3 70B engine using Server-Sent Events (SSE).
 * **📊 Per-Answer Evaluation Cards**: Instant scoring (`1-10`), strengths, and actionable improvement feedback after each submitted answer.
 * **🗺️ Personalized 4-Week Study Roadmap**: AI-generated weekly study timeline targeting your specific gaps and interview weaknesses.
+* **🐳 Docker Containerization**: Fully packaged with `Dockerfile`, `.dockerignore`, and `docker-compose.yml` for effortless container deployment.
 * **💎 Sleek Dark Glassmorphism UI**: Built with Vanilla CSS design tokens and **Lucide Icons** for a premium aesthetic.
 
 ---
@@ -31,6 +32,7 @@ Powered by **Flask**, **SQLite**, and **Groq LLaMA 3.3 70B**, PrepAI delivers a 
 | **LLM Provider** | Groq SDK (`llama-3.3-70b-versatile`) |
 | **PDF Extraction** | `pypdf` (Pure Python PDF parsing) |
 | **Database** | SQLite3 (Resumes, Sessions, Questions, Answers, Analysis Cache) |
+| **Containerization** | Docker & Docker Compose (`python:3.11-slim`) |
 | **Frontend** | HTML5, Vanilla CSS3 (Glassmorphism), ES6+ JavaScript |
 | **Icons** | Lucide Icons (`lucide-react` / `lucide` SVG) |
 | **Environment Config** | `python-dotenv` |
@@ -44,6 +46,9 @@ d:\ProjectIBM\
 ├── app.py                  # Main Flask application entry point & DB initializer
 ├── config.py               # Configuration management & environment variable loader
 ├── requirements.txt        # Python package dependencies
+├── Dockerfile              # Docker container build specification
+├── .dockerignore           # Files excluded from Docker image build
+├── docker-compose.yml      # Multi-container / Docker Compose configuration
 ├── .env                    # Environment secrets (GROQ_API_KEY, secret keys)
 ├── .gitignore              # Git ignore rules
 ├── interview_prep.db       # SQLite database (auto-created on startup)
@@ -83,19 +88,64 @@ d:\ProjectIBM\
 
 ---
 
-## 🚀 Getting Started & Local Setup
+## 🐳 Containerization & Docker Setup
+
+You can run the application as a Docker container using either **Docker CLI** or **Docker Compose**.
+
+### Option A: Using Docker Compose (Recommended)
+
+1. Make sure you have a `.env` file in the project root containing your Groq API key:
+   ```ini
+   GROQ_API_KEY=gsk_your_actual_groq_api_key_here
+   FLASK_SECRET_KEY=supersecretkey123
+   ```
+
+2. Build and start the container:
+   ```bash
+   docker compose up -d --build
+   ```
+
+3. Open **[http://localhost:5000](http://localhost:5000)** in your browser.
+
+4. To stop the container:
+   ```bash
+   docker compose down
+   ```
+
+---
+
+### Option B: Using Docker CLI Directly
+
+1. Build the Docker image:
+   ```bash
+   docker build -t prepai-app .
+   ```
+
+2. Run the Docker container with your `.env` file:
+   ```bash
+   docker run -d \
+     --name prepai_container \
+     -p 5000:5000 \
+     --env-file .env \
+     prepai-app
+   ```
+
+3. Access the app at **[http://localhost:5000](http://localhost:5000)**.
+
+4. Stop and remove the container:
+   ```bash
+   docker stop prepai_container && docker rm prepai_container
+   ```
+
+---
+
+## 🚀 Standard Local Setup (Without Docker)
 
 ### 1. Prerequisites
 - **Python 3.10** or higher installed on your system.
 - A free **Groq API Key** (Get one at [console.groq.com/keys](https://console.groq.com/keys)).
 
-### 2. Clone the Repository
-```bash
-git clone https://github.com/your-username/PrepAI.git
-cd PrepAI
-```
-
-### 3. Set Up Virtual Environment
+### 2. Set Up Virtual Environment
 ```bash
 # Windows
 python -m venv venv
@@ -106,12 +156,12 @@ python3 -m venv venv
 source venv/bin/activate
 ```
 
-### 4. Install Dependencies
+### 3. Install Dependencies
 ```bash
 pip install -r requirements.txt
 ```
 
-### 5. Configure Environment Variables
+### 4. Configure Environment Variables
 Create or edit `.env` in the project root:
 ```ini
 GROQ_API_KEY=gsk_your_actual_groq_api_key_here
@@ -120,7 +170,7 @@ FLASK_DEBUG=true
 DB_PATH=interview_prep.db
 ```
 
-### 6. Run the Application
+### 5. Run the Application
 ```bash
 python app.py
 ```
@@ -141,16 +191,6 @@ Open **[http://localhost:5000](http://localhost:5000)** in your browser!
 | `GET` | `/api/sessions` | List all interview sessions and average scores |
 | `GET` | `/api/feedback` | Retrieve complete score breakdown & evaluation for a session |
 | `GET` | `/api/roadmap` | Generate 4-week study roadmap based on resume & feedback |
-
----
-
-## 🛣️ User Journey Flow
-
-1. **Upload Resume (`/upload.html`)**: Drop a PDF resume. The 4-step progress tracker extracts text instantly and triggers background AI analysis.
-2. **Review Analysis (`/analysis.html`)**: Inspect extracted technical skills, suitable job roles, key strengths, and areas to improve.
-3. **Start Mock Interview (`/interview.html`)**: Choose **HR**, **Technical**, or **Coding** mode. Answer 5 questions grounded directly in your listed projects and experiences.
-4. **View Feedback (`/feedback.html`)**: Review your average score (`/10`), score rings, question-by-question breakdown, strengths, and areas to improve.
-5. **Follow Study Roadmap (`/roadmap.html`)**: Access a personalized 4-week timeline with weekly topics, resources, and actionable targets.
 
 ---
 
